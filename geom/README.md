@@ -28,4 +28,5 @@ and [Windows 10]. So it should work pretty much everywhere.
 [installation instructions]: https://ebiten.org/documents/install.html
 [Chromebook Pixel 2]: https://www.google.com/search?q=chromebook+pixel+2&rlz=1CATSID_enCH788CH788&sxsrf=ALeKk00XlfhL6ziH6EeE_8UxU_HEnn62yQ:1588155834763&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjt94HDtY3pAhVR-6QKHQouAPIQ_AUoAXoECAwQAw&biw=1600&bih=991
 [Linux (beta)]: https://support.google.com/chromebook/answer/9145439?hl=en
+[Debian Linux]: https://www.debian.org/
 [Windows 10]: https://en.wikipedia.org/wiki/Windows_10
