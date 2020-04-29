@@ -31,6 +31,7 @@ func (s *Simulation) update() {}
 
 func (s *Simulation) draw(screen *ebiten.Image) {
 	body.Present(screen, newBodyIterator(s.bodies))
+	debugPrint(screen, s)
 }
 
 func (s *Simulation) addBody(b *body.Body) {

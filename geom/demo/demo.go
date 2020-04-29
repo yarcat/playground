@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/hajimehoshi/ebiten"
 	"github.com/yarcat/playground/geom/body"
 	"github.com/yarcat/playground/geom/shape"
 	"github.com/yarcat/playground/geom/simulation"
@@ -21,6 +22,12 @@ func main() {
 		Pos:   vec.New(screenWidth/2, screenHeight/2),
 	}
 	simulation.AddBody(sim, body)
+
+	ebiten.SetWindowDecorated(true)
+	ebiten.SetWindowFloating(true)
+	ebiten.SetWindowResizable(true)
+	ebiten.SetWindowTitle("Simulation Demo")
+
 	if err := simulation.Run(sim); err != nil {
 		log.Fatalf("Run failed: %v", err)
 	}

@@ -1,6 +1,8 @@
 package simulation
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/hajimehoshi/ebiten"
+)
 
 // Run executes main simulation loop.
 func Run(s *Simulation) error {
