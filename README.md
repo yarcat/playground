@@ -1,2 +1,3 @@
-# playground
-Various experiments
+# Playground
+
+Various experiments, proof of concepts, etc.
