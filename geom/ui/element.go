@@ -2,6 +2,7 @@ package ui
 
 import (
 	"image"
+	"log"
 )
 
 // elementImpl represents a rectangular UI area. The area could be used to receive
@@ -38,6 +39,7 @@ func (e *elementImpl) Rect() image.Rectangle {
 
 // SetRect allows to move and/or resize this element relatively to its parent.
 func (e *elementImpl) SetRect(rect image.Rectangle) {
+	log.Printf("elementImplSetRect: old=%#v, new=%#v", e.rect, rect)
 	e.rect = rect
 }
 

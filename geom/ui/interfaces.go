@@ -16,8 +16,6 @@ type Element interface {
 	// SetRect allows to move and/or resize this element relatively to its
 	// parent.
 	SetRect(rect image.Rectangle)
-	// AddChild adds new child to this element.
-	AddChild(Element)
 
 	// OnDraw handles draw events.
 	// This method shouldn't be executed directly.

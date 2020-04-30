@@ -29,39 +29,29 @@ func main() {
 
 	simRect := image.Rect(0, 0, screenWidth, screenHeight)
 	sim := simulation.New(ui.NewElement(app, simRect))
-	app.Root().AddChild(sim)
+	app.Attach(sim, app.Root())
 	circle := &body.Body{
 		Image: shapes.Circle(50, color.White),
-		Pos:   vector.New(screenWidth/2, screenHeight/2),
+		Pos:   vector.New(300, 300),
 	}
 	rect := &body.Body{
-		Image: shapes.Rectangle(60, 60, color.White),
-		Pos:   vector.New(100, 50),
+		Image: shapes.Rectangle(50, 50, color.White),
+		Pos:   vector.New(100, 100),
 	}
-	sim.AddChild(contrib.NewDragger(
+	app.Attach(contrib.NewDragger(
 		app,
-		image.Rect(
-			100,
-			50,
-			160,
-			110,
-		),
+		image.Rect(250, 250, 350, 350),
 		func(r image.Rectangle) {
 			circle.Pos = vector.New(float64(r.Min.X), float64(r.Min.Y))
 		},
-	))
-	sim.AddChild(contrib.NewDragger(
+	), sim)
+	app.Attach(contrib.NewDragger(
 		app,
-		image.Rect(
-			screenWidth/2,
-			screenHeight/2,
-			screenWidth/2+120,
-			screenHeight/2+120,
-		),
+		image.Rect(75, 75, 125, 125),
 		func(r image.Rectangle) {
 			rect.Pos = vector.New(float64(r.Min.X), float64(r.Min.Y))
 		},
-	))
+	), sim)
 	sim.AddBody(circle)
 	sim.AddBody(rect)
 

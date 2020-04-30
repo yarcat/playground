@@ -2,6 +2,7 @@ package ui
 
 import (
 	"image"
+	"log"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -56,6 +57,7 @@ func (mm *mouseManager) waitButtonReleased(pressed bool) {
 
 func (mm *mouseManager) sendMouseEvent(sendEvent func(Element, image.Point)) {
 	cursor := image.Pt(ebiten.CursorPosition())
+	log.Printf("sendMouseEvent: cursor=%#v", cursor)
 	if len(mm.capture) == 0 {
 		element, point := mm.underPoint(cursor)
 		sendEvent(element, point)
@@ -80,6 +82,6 @@ func (mm *mouseManager) uncaptureMouse(element Element) {
 // in the element coordinates.
 func (mm *mouseManager) underPoint(point image.Point) (element Element, cursor image.Point) {
 	var rect image.Rectangle
-	element, rect = ElementAt(mm.ui, cursor)
-	return element, cursor.Sub(rect.Min)
+	element, rect = ElementAt(mm.ui, point)
+	return element, point.Sub(rect.Min)
 }
