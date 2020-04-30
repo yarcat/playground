@@ -1,18 +1,13 @@
 package body
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/yarcat/playground/geom/image"
+)
 
 // Present draws bodies on the screen.
-func Present(screen *ebiten.Image, it Iterator) {
-	op := &ebiten.DrawImageOptions{}
-	img := &originImage{
-		img: screen,
-		op:  op,
-	}
+func Present(image image.Image, it Iterator) {
 	for it.Next() {
 		b := it.Value()
-		op.GeoM.Translate(b.Pos.X, b.Pos.Y)
-		b.Shape.Draw(img)
-		op.GeoM.Translate(-b.Pos.X, -b.Pos.Y)
+		b.Shape.Draw(image)
 	}
 }

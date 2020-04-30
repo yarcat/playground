@@ -1,4 +1,4 @@
-package simulation
+package ui
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
-func debugPrint(screen *ebiten.Image, s *Simulation) {
+func debugPrint(screen *ebiten.Image) {
 	const debugTmpl = `
 FPS : %.2f
 TPS : %.2f

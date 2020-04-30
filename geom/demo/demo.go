@@ -8,6 +8,7 @@ import (
 	"github.com/yarcat/playground/geom/body"
 	"github.com/yarcat/playground/geom/shape"
 	"github.com/yarcat/playground/geom/simulation"
+	"github.com/yarcat/playground/geom/ui"
 	vec "github.com/yarcat/playground/geom/vector"
 )
 
@@ -16,19 +17,25 @@ const (
 )
 
 func main() {
-	sim := simulation.New(screenWidth, screenHeight)
-	body := &body.Body{
-		Shape: &shape.Circle{R: 100, Color: color.White},
-		Pos:   vec.New(screenWidth/2, screenHeight/2),
-	}
-	simulation.AddBody(sim, body)
-
 	ebiten.SetWindowDecorated(true)
 	ebiten.SetWindowFloating(true)
 	ebiten.SetWindowResizable(true)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Simulation Demo")
 
-	if err := simulation.Run(sim); err != nil {
+	app := ui.NewUI(screenWidth, screenHeight)
+
+	simRect := ui.Rect{
+		Left: 0, Bottom: 0,
+		Right: screenWidth, Top: screenHeight}
+	sim := simulation.New(ui.NewElement(app, simRect))
+	app.Root().AddChild(sim)
+	sim.AddBody(&body.Body{
+		Shape: &shape.Circle{R: 10, Color: color.White},
+		Pos:   vec.New(screenWidth-10, 10),
+	})
+
+	if err := ui.Run(app); err != nil {
 		log.Fatalf("Run failed: %v", err)
 	}
 }
