@@ -2,14 +2,14 @@
 package body
 
 import (
-	"github.com/yarcat/playground/geom/shape"
+	"github.com/hajimehoshi/ebiten"
 	vec "github.com/yarcat/playground/geom/vector"
 )
 
 // Body is a simple body that cannot move by itself, but has a position on the
 // screen.
 type Body struct {
-	Shape shape.Shape
+	Image *ebiten.Image
 	Pos   vec.Vector
 }
 

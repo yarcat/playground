@@ -2,7 +2,6 @@ package ui
 
 import (
 	"image"
-	"log"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -48,30 +47,24 @@ func (ui *UI) draw(screen *ebiten.Image) {
 	}
 }
 
-func elementImage(ui *UI, element Element) *ebiten.Image {
+// elementImage returns current used screen image and the element's rectangle
+// in screen coordinates.
+func elementImage(ui *UI, element Element) (*ebiten.Image, image.Rectangle) {
 	if element == ui.root {
-		return ui.screen
+		return ui.screen, ui.root.Rect()
 	}
-	rect := elementRect(ui, element)
-	return ui.screen.SubImage(rect).(*ebiten.Image)
+	return ui.screen, screenRect(ui, element)
 }
 
-func elementRect(ui *UI, element Element) image.Rectangle {
+// screenRect returns a rectangle for the given element in screen coordinates.
+func screenRect(ui *UI, element Element) image.Rectangle {
 	if element == ui.root {
 		return ui.root.Rect()
 	}
-	parent, ok := ui.elements[element]
-	if !ok {
-		log.Println("Requested element is not registered", element)
-		return image.Rectangle{}
-	}
-	parentRect := elementRect(ui, parent)
-	if parentRect.Empty() {
-		return parentRect
-	}
-	elemRect := element.Rect()
-	return image.Rectangle{
-		Min: parentRect.Min.Add(elemRect.Min),
-		Max: parentRect.Min.Add(elemRect.Max),
-	}
+	rect := element.Rect()
+	parent := ui.elements[element]
+	parentRect := screenRect(ui, parent)
+	min := parentRect.Min.Add(rect.Min)
+	max := min.Add(rect.Size())
+	return image.Rectangle{Max: max, Min: min}
 }

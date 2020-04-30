@@ -7,7 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/yarcat/playground/geom/body"
-	"github.com/yarcat/playground/geom/shape"
+	"github.com/yarcat/playground/geom/shapes"
 	"github.com/yarcat/playground/geom/simulation"
 	"github.com/yarcat/playground/geom/ui"
 	vec "github.com/yarcat/playground/geom/vector"
@@ -30,7 +30,7 @@ func main() {
 	sim := simulation.New(ui.NewElement(app, simRect))
 	app.Root().AddChild(sim)
 	sim.AddBody(&body.Body{
-		Shape: &shape.Circle{R: 10, Color: color.White},
+		Image: shapes.Circle(10, color.White),
 		Pos:   vec.New(screenWidth-10, 10),
 	})
 

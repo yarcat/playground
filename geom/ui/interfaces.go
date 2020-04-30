@@ -19,7 +19,8 @@ type Element interface {
 	OnDraw(*DrawEvent)
 }
 
-// Image returns an image area representing this element.
-func Image(element Element) *ebiten.Image {
+// Image returns an image area representing this element and its rectangle in
+// screen coordinates.
+func Image(element Element) (*ebiten.Image, image.Rectangle) {
 	return elementImage(element.UI(), element)
 }
