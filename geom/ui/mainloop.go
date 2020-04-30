@@ -13,6 +13,7 @@ type gameAdapter UI
 
 // Update updates a game by one tick. The screen provided is ignored.
 func (ga *gameAdapter) Update(screen *ebiten.Image) error {
+	(*UI)(ga).update()
 	return nil
 }
 
