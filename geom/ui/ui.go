@@ -1,9 +1,6 @@
 package ui
 
-import (
-	"github.com/hajimehoshi/ebiten"
-	"github.com/yarcat/playground/geom/image"
-)
+import "github.com/hajimehoshi/ebiten"
 
 // UI represents an abstract user interface manager. The UI manager is reponsible
 // for bookkeeping the world e.g. parenting info, etc.
@@ -11,7 +8,6 @@ type UI struct {
 	screenWidth, screenHeight int
 	// screen is currently used image. It changes every time draw() callback is invoked.
 	screen *ebiten.Image
-	img    image.Image
 	root   Element
 	// elements maps elements to their parents.
 	elements map[Element]Element
@@ -44,13 +40,12 @@ func (ui *UI) Root() Element {
 
 func (ui *UI) draw(screen *ebiten.Image) {
 	ui.screen = screen
-	ui.img = image.NewImage(ui.screen, &ebiten.DrawImageOptions{})
 	drawEvent := &DrawEvent{}
 	for element := range ui.elements {
 		SendEvent(element, drawEvent)
 	}
 }
 
-func (ui *UI) image(element Element) Image {
-	return ui.img
+func (ui *UI) image(element Element) *ebiten.Image {
+	return ui.screen
 }

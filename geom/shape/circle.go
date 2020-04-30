@@ -3,7 +3,7 @@ package shape
 import (
 	"image/color"
 
-	"github.com/yarcat/playground/geom/image"
+	"github.com/hajimehoshi/ebiten"
 )
 
 // Circle represents a circle that could be used in the simulation.
@@ -15,11 +15,11 @@ type Circle struct {
 }
 
 // Draw draws a complete circle with the center in origin.
-func (c Circle) Draw(image image.Image) {
+func (c Circle) Draw(image *ebiten.Image) {
 	drawCircle(image, int(c.R), c.Color)
 }
 
-func drawCircle(image image.Image, r int, c color.Color) {
+func drawCircle(image *ebiten.Image, r int, c color.Color) {
 	x, y, dx, dy := r-1, 0, 1, 1
 	err := dx - (r * 2)
 	for x > y {

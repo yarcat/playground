@@ -1,5 +1,7 @@
 package ui
 
+import "github.com/hajimehoshi/ebiten"
+
 // elementImpl represents a rectangular UI area. The area could be used to receive
 // user interface events e.g. DrawEvent.
 type elementImpl struct {
@@ -33,22 +35,9 @@ func (e *elementImpl) AddChild(child Element) {
 }
 
 // Image returns an image area representing this element.
-func (e *elementImpl) Image() Image {
+func (e *elementImpl) Image() *ebiten.Image {
 	return e.ui.image(e)
 }
 
 // OnDraw handles draw events. This method shouldn't be executed directly.
 func (e *elementImpl) OnDraw(evt *DrawEvent) {}
-
-// Element represents a user interface element. It will receive mouse, keyboard
-// and other events.
-type Element interface {
-	// Rect returns a rectangle that defines dimensions of this element.
-	Rect() Rect
-	// AddChild adds new child to this element.
-	AddChild(Element)
-	// Image returns an image area representing this element.
-	Image() Image
-	// OnDraw handles draw events. This method shouldn't be executed directly.
-	OnDraw(*DrawEvent)
-}
