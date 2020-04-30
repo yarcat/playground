@@ -84,13 +84,11 @@ func screenRect(ui *UI, element Element) image.Rectangle {
 // elementAt returns an element under the point in logical screen coordinates
 // (this includes scaling).
 func elementAt(ui *UI, point image.Point) (Element, image.Rectangle) {
-	log.Printf("elementAt: point=%#v, ui.elements=%#v", point, ui.elements)
 	allElementsUnderPoint := func() (elements []Element) {
 		// TODO(yarcat): Optimize this, cache rectangles calculated, etc.
 		// This works while we don't have many elements thought.
 		for el := range ui.elements {
 			rect := screenRect(ui, el)
-			log.Printf("elementAt: el=%#v, rect=%#v", el, rect)
 			if point.In(rect) {
 				elements = append(elements, el)
 			}
@@ -112,18 +110,15 @@ func elementAt(ui *UI, point image.Point) (Element, image.Rectangle) {
 	}
 
 	underPoint := allElementsUnderPoint()
-	log.Printf("elementAt: underPoint=%#v", underPoint)
 
 	// Now we need to precise the element. We'll try to find the first element,
 	// which doesn't have a child in the elements registry.
 	ancestors := make([]Element, 0, 10)
 	for _, testElem := range underPoint {
-		log.Printf("elementAt: testElem = %#v", testElem)
 		ancestors = ancestors[:0]
 		for el, ok := ui.elements[testElem]; ok; el, ok = ui.elements[el] {
 			ancestors = append(ancestors, el)
 		}
-		log.Printf("elementAt: ancestors = %#v", ancestors)
 		underPoint = removeElements(underPoint, ancestors)
 	}
 	// TODO(yarcat): Implement a way to return the same element even if there

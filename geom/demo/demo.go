@@ -42,14 +42,14 @@ func main() {
 		app,
 		image.Rect(250, 250, 350, 350),
 		func(r image.Rectangle) {
-			circle.Pos = vector.New(float64(r.Min.X), float64(r.Min.Y))
+			circle.Pos = vector.New(float64(r.Min.X)+50, float64(r.Min.Y)+50)
 		},
 	), sim)
 	app.Attach(contrib.NewDragger(
 		app,
 		image.Rect(75, 75, 125, 125),
 		func(r image.Rectangle) {
-			rect.Pos = vector.New(float64(r.Min.X), float64(r.Min.Y))
+			rect.Pos = vector.New(float64(r.Min.X)+25, float64(r.Min.Y)+25)
 		},
 	), sim)
 	sim.AddBody(circle)

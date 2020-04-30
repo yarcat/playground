@@ -27,8 +27,5 @@ func (ga *gameAdapter) Draw(screen *ebiten.Image) {
 // Layout returns the desired screen dimensions. Current implementation ignores
 // the window dimensions provided.
 func (ga *gameAdapter) Layout(outsideWidth int, outsideHeight int) (screenWidth int, screenHeight int) {
-	// log.Printf(
-	// 	"Layout(outsideWidth=%v, outsideHeight=%v) => (screenWidth=%v, screenHeight=%v)",
-	// 	outsideWidth, outsideHeight, ga.screenWidth, ga.screenHeight)
 	return ga.screenWidth, ga.screenHeight
 }
