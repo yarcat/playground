@@ -33,6 +33,10 @@ func main() {
 		Image: shapes.Circle(50, color.White),
 		Pos:   vector.New(screenWidth/2, screenHeight/2),
 	})
+	sim.AddBody(&body.Body{
+		Image: shapes.Rectangle(60, 60, color.White),
+		Pos:   vector.New(100, 50),
+	})
 
 	if err := ui.Run(app); err != nil {
 		log.Fatalf("Run failed: %v", err)
