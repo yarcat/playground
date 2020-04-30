@@ -26,7 +26,7 @@ func main() {
 
 	app := ui.NewUI(screenWidth, screenHeight)
 
-	simRect := image.Rect(0, 0, screenWidth, screenHeight)
+	simRect := image.Rect(100, 100, 200, 200)
 	sim := simulation.New(ui.NewElement(app, simRect))
 	app.Root().AddChild(sim)
 	sim.AddBody(&body.Body{

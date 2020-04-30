@@ -2,6 +2,7 @@ package ui
 
 import (
 	"image"
+	"log"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -47,6 +48,30 @@ func (ui *UI) draw(screen *ebiten.Image) {
 	}
 }
 
-func (ui *UI) image(element Element) *ebiten.Image {
-	return ui.screen
+func elementImage(ui *UI, element Element) *ebiten.Image {
+	if element == ui.root {
+		return ui.screen
+	}
+	rect := elementRect(ui, element)
+	return ui.screen.SubImage(rect).(*ebiten.Image)
+}
+
+func elementRect(ui *UI, element Element) image.Rectangle {
+	if element == ui.root {
+		return ui.root.Rect()
+	}
+	parent, ok := ui.elements[element]
+	if !ok {
+		log.Println("Requested element is not registered", element)
+		return image.Rectangle{}
+	}
+	parentRect := elementRect(ui, parent)
+	if parentRect.Empty() {
+		return parentRect
+	}
+	elemRect := element.Rect()
+	return image.Rectangle{
+		Min: parentRect.Min.Add(elemRect.Min),
+		Max: parentRect.Min.Add(elemRect.Max),
+	}
 }

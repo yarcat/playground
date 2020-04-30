@@ -32,6 +32,6 @@ func (s *Simulation) AddBody(b *body.Body) {
 
 // OnDraw redraws the simulation.
 func (s *Simulation) OnDraw(evt *ui.DrawEvent) {
-	img := s.Image()
+	img := ui.Image(s)
 	body.Present(img, newBodyIterator(s.bodies))
 }
