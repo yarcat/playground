@@ -28,7 +28,8 @@ func (mm *mouseManager) waitButtonPressed(pressed bool) {
 	if !pressed {
 		return
 	}
-	mm.sendEventToElementUnderCursor(&MouseButtonPressedEvent{})
+	element, point := underCursor(mm.ui)
+	SendEvent(element, &MouseButtonPressedEvent{Cursor: point})
 	mm.leftButtonState = mm.waitButtonReleased
 }
 
@@ -36,12 +37,16 @@ func (mm *mouseManager) waitButtonReleased(pressed bool) {
 	if pressed {
 		return
 	}
-	mm.sendEventToElementUnderCursor(&MouseButtonReleasedEvent{})
+	element, point := underCursor(mm.ui)
+	SendEvent(element, &MouseButtonReleasedEvent{Cursor: point})
 	mm.leftButtonState = mm.waitButtonPressed
 }
 
-func (mm *mouseManager) sendEventToElementUnderCursor(event Event) {
-	element := ElementAt(mm.ui, image.Pt(ebiten.CursorPosition()))
-	SendEvent(element, event)
-	mm.leftButtonState = mm.waitButtonReleased
+// underCursor returns an element under cursor and cursor position
+// in the element coordinates.
+func underCursor(ui *UI) (element Element, cursor image.Point) {
+	cursor = image.Pt(ebiten.CursorPosition())
+	var rect image.Rectangle
+	element, rect = ElementAt(ui, cursor)
+	return element, cursor.Sub(rect.Min)
 }

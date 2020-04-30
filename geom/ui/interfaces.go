@@ -36,6 +36,6 @@ func Image(element Element) (*ebiten.Image, image.Rectangle) {
 // ElementAt returns an element under the point. The top-most child get
 // returned if there are multiple elements at this point. The point is in
 // logical screen coordinates (this includes screen scaling).
-func ElementAt(ui *UI, point image.Point) Element {
+func ElementAt(ui *UI, point image.Point) (Element, image.Rectangle) {
 	return elementAt(ui, point)
 }

@@ -80,7 +80,7 @@ func screenRect(ui *UI, element Element) image.Rectangle {
 
 // elementAt returns an element under the point in logical screen coordinates
 // (this includes scaling).
-func elementAt(ui *UI, point image.Point) Element {
+func elementAt(ui *UI, point image.Point) (Element, image.Rectangle) {
 	allElementsUnderPoint := func() (elements []Element) {
 		// TODO(yarcat): Optimize this, cache rectangles calculated, etc.
 		// This works while we don't have many elements thought.
@@ -123,7 +123,7 @@ func elementAt(ui *UI, point image.Point) Element {
 	if len(underPoint) != 1 {
 		log.Printf("elementAt: len(underPoint) = %d, want 1. Returning root.",
 			len(underPoint))
-		return ui.root
+		return ui.root, ui.root.Rect()
 	}
-	return underPoint[0]
+	return underPoint[0], screenRect(ui, underPoint[0])
 }

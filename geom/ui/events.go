@@ -1,5 +1,7 @@
 package ui
 
+import "image"
+
 // Event is an abstract event which can be sent to elements.
 type Event interface {
 	DispatchEvent(EventHandler)
@@ -18,7 +20,9 @@ func SendEvent(element Element, e Event) {
 }
 
 // MouseButtonPressedEvent is sent to the element on which mouse button was pressed.
-type MouseButtonPressedEvent struct{}
+type MouseButtonPressedEvent struct {
+	Cursor image.Point
+}
 
 // DispatchEvent calls EventHandler.OnMouseButtonPressed.
 func (evt *MouseButtonPressedEvent) DispatchEvent(d EventHandler) {
@@ -26,7 +30,9 @@ func (evt *MouseButtonPressedEvent) DispatchEvent(d EventHandler) {
 }
 
 // MouseButtonReleasedEvent is sent to the element on which mouse button was released.
-type MouseButtonReleasedEvent struct{}
+type MouseButtonReleasedEvent struct {
+	Cursor image.Point
+}
 
 // DispatchEvent calls EventHandler.OnMouseButtonReleased.
 func (evt *MouseButtonReleasedEvent) DispatchEvent(d EventHandler) {
