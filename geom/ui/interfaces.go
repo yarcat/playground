@@ -13,6 +13,9 @@ type Element interface {
 	UI() *UI
 	// Rect returns a rectangle that defines dimensions of this element.
 	Rect() image.Rectangle
+	// SetRect allows to move and/or resize this element relatively to its
+	// parent.
+	SetRect(rect image.Rectangle)
 	// AddChild adds new child to this element.
 	AddChild(Element)
 

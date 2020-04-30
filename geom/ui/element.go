@@ -36,6 +36,11 @@ func (e *elementImpl) Rect() image.Rectangle {
 	return e.rect
 }
 
+// SetRect allows to move and/or resize this element relatively to its parent.
+func (e *elementImpl) SetRect(rect image.Rectangle) {
+	e.rect = rect
+}
+
 // AddChild adds new child to this element.
 func (e *elementImpl) AddChild(child Element) {
 	e.ui.Attach(child, e)
