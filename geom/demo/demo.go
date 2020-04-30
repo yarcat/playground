@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 	"log"
 
@@ -25,9 +26,7 @@ func main() {
 
 	app := ui.NewUI(screenWidth, screenHeight)
 
-	simRect := ui.Rect{
-		Left: 0, Bottom: 0,
-		Right: screenWidth, Top: screenHeight}
+	simRect := image.Rect(0, 0, screenWidth, screenHeight)
 	sim := simulation.New(ui.NewElement(app, simRect))
 	app.Root().AddChild(sim)
 	sim.AddBody(&body.Body{

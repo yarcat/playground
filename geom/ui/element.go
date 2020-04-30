@@ -1,6 +1,10 @@
 package ui
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"image"
+
+	"github.com/hajimehoshi/ebiten"
+)
 
 // elementImpl represents a rectangular UI area. The area could be used to receive
 // user interface events e.g. DrawEvent.
@@ -8,7 +12,7 @@ type elementImpl struct {
 	// ui is a main user interface manager.
 	ui *UI
 	// rect is a rectangle that defines this element.
-	rect Rect
+	rect image.Rectangle
 }
 
 // NewElement returns rectangular element. The element will not display itself
@@ -17,7 +21,7 @@ type elementImpl struct {
 // Provided rectangle represents a rectangular area in the coordinates of the
 // element's parent. These will be appliation window coordinates if this is a
 // top-level element.
-func NewElement(ui *UI, rect Rect) Element {
+func NewElement(ui *UI, rect image.Rectangle) Element {
 	return &elementImpl{
 		ui:   ui,
 		rect: rect,
@@ -25,7 +29,7 @@ func NewElement(ui *UI, rect Rect) Element {
 }
 
 // Rect returns a rectangle that defines dimensions of this element.
-func (e *elementImpl) Rect() Rect {
+func (e *elementImpl) Rect() image.Rectangle {
 	return e.rect
 }
 

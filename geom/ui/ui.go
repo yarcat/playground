@@ -1,6 +1,10 @@
 package ui
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"image"
+
+	"github.com/hajimehoshi/ebiten"
+)
 
 // UI represents an abstract user interface manager. The UI manager is reponsible
 // for bookkeeping the world e.g. parenting info, etc.
@@ -20,10 +24,7 @@ func NewUI(screenWidth, screenHeight int) *UI {
 		screenHeight: screenHeight,
 		elements:     make(map[Element]Element),
 	}
-	screenRect := Rect{
-		Left: 0, Bottom: 0,
-		Right: screenWidth, Top: screenHeight,
-	}
+	screenRect := image.Rect(0, 0, screenWidth, screenHeight)
 	ui.root = NewElement(ui, screenRect)
 	return ui
 }
