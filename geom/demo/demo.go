@@ -10,7 +10,7 @@ import (
 	"github.com/yarcat/playground/geom/shapes"
 	"github.com/yarcat/playground/geom/simulation"
 	"github.com/yarcat/playground/geom/ui"
-	vec "github.com/yarcat/playground/geom/vector"
+	"github.com/yarcat/playground/geom/vector"
 )
 
 const (
@@ -26,12 +26,12 @@ func main() {
 
 	app := ui.NewUI(screenWidth, screenHeight)
 
-	simRect := image.Rect(100, 100, 200, 200)
+	simRect := image.Rect(0, 0, screenWidth, screenHeight)
 	sim := simulation.New(ui.NewElement(app, simRect))
 	app.Root().AddChild(sim)
 	sim.AddBody(&body.Body{
-		Image: shapes.Circle(10, color.White),
-		Pos:   vec.New(screenWidth-10, 10),
+		Image: shapes.Circle(50, color.White),
+		Pos:   vector.New(screenWidth/2, screenHeight/2),
 	})
 
 	if err := ui.Run(app); err != nil {

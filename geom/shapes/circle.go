@@ -19,7 +19,7 @@ func Circle(r int, c color.Color) *ebiten.Image {
 func DrawCircle(image *ebiten.Image, x, y, r int, c color.Color) {
 	x0, y0, x, y, dx, dy := x, y, r-1, 0, 1, 1
 	err := dx - (r * 2)
-	for x > y {
+	for x >= y {
 		image.Set(x0+x, y0+y, c)
 		image.Set(x0+y, y0+x, c)
 		image.Set(x0-y, y0+x, c)

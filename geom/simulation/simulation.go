@@ -3,6 +3,8 @@
 package simulation
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
 	"github.com/yarcat/playground/geom/body"
 	"github.com/yarcat/playground/geom/contrib/container/orderedmap"
@@ -35,10 +37,12 @@ func (s *Simulation) AddBody(b *body.Body) {
 	s.bodies.Set(b, nil)
 }
 
+var backgroundColor = color.RGBA{20, 20, 20, 20}
+
 // OnDraw redraws the simulation.
 func (s *Simulation) OnDraw(evt *ui.DrawEvent) {
 	img, rect := ui.Image(s)
-	s.image.Clear()
+	s.image.Fill(backgroundColor)
 	body.Present(s.image, newBodyIterator(s.bodies))
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
