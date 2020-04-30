@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"log"
+	"image"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -9,11 +9,12 @@ import (
 type buttonStateFn func(pressed bool)
 
 type mouseManager struct {
+	ui              *UI
 	leftButtonState buttonStateFn
 }
 
-func newMouseManager() *mouseManager {
-	manager := &mouseManager{}
+func newMouseManager(ui *UI) *mouseManager {
+	manager := &mouseManager{ui: ui}
 	manager.leftButtonState = manager.waitButtonPressed
 	return manager
 }
@@ -27,7 +28,7 @@ func (mm *mouseManager) waitButtonPressed(pressed bool) {
 	if !pressed {
 		return
 	}
-	log.Println("released -> pressed")
+	mm.sendEventToElementUnderCursor(&MouseButtonPressedEvent{})
 	mm.leftButtonState = mm.waitButtonReleased
 }
 
@@ -35,6 +36,12 @@ func (mm *mouseManager) waitButtonReleased(pressed bool) {
 	if pressed {
 		return
 	}
-	log.Println("pressed -> released")
+	mm.sendEventToElementUnderCursor(&MouseButtonReleasedEvent{})
 	mm.leftButtonState = mm.waitButtonPressed
+}
+
+func (mm *mouseManager) sendEventToElementUnderCursor(event Event) {
+	element := ElementAt(mm.ui, image.Pt(ebiten.CursorPosition()))
+	SendEvent(element, event)
+	mm.leftButtonState = mm.waitButtonReleased
 }

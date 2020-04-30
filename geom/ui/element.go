@@ -41,5 +41,14 @@ func (e *elementImpl) AddChild(child Element) {
 	e.ui.Attach(child, e)
 }
 
-// OnDraw handles draw events. This method shouldn't be executed directly.
+// OnDraw handles draw events.
+// This method shouldn't be executed directly.
 func (e *elementImpl) OnDraw(evt *DrawEvent) {}
+
+// OnMouseButtonPressed handles mouse button press notifications.
+// This method shouldn't be executed directly.
+func (e *elementImpl) OnMouseButtonPressed(*MouseButtonPressedEvent) {}
+
+// OnMouseButtonPressed handles mouse button release notifications.
+// This method shouldn't be executed directly.
+func (e *elementImpl) OnMouseButtonReleased(*MouseButtonReleasedEvent) {}

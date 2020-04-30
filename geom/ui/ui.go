@@ -26,8 +26,8 @@ func NewUI(screenWidth, screenHeight int) *UI {
 		screenWidth:  screenWidth,
 		screenHeight: screenHeight,
 		elements:     make(map[Element]Element),
-		mouse:        newMouseManager(),
 	}
+	ui.mouse = newMouseManager(ui)
 	screenRect := image.Rect(0, 0, screenWidth, screenHeight)
 	ui.root = NewElement(ui, screenRect)
 	return ui
@@ -75,4 +75,11 @@ func screenRect(ui *UI, element Element) image.Rectangle {
 	min := parentRect.Min.Add(rect.Min)
 	max := min.Add(rect.Size())
 	return image.Rectangle{Max: max, Min: min}
+}
+
+// elementAt returns an element under the point in logical screen coordinates
+// (this includes scaling).
+func elementAt(ui *UI, point image.Point) Element {
+	// TODO(yarcat): Return a real element under the point.
+	return ui.root
 }
