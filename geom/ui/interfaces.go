@@ -25,6 +25,11 @@ type Element interface {
 	// OnMouseButtonPressed handles mouse button release notifications.
 	// This method shouldn't be executed directly.
 	OnMouseButtonReleased(*MouseButtonReleasedEvent)
+	// OnMousePosition handles mouse position updates.
+	// This method shouldn't be executed directly.
+	// Note: Mouse position updates aren't sent until mouse capturing is set
+	// for the element.
+	OnMousePosition(*MousePositionEvent)
 }
 
 // Image returns an image area representing this element and its rectangle in
@@ -38,4 +43,21 @@ func Image(element Element) (*ebiten.Image, image.Rectangle) {
 // logical screen coordinates (this includes screen scaling).
 func ElementAt(ui *UI, point image.Point) (Element, image.Rectangle) {
 	return elementAt(ui, point)
+}
+
+// CaptureMouse captures mouse inputs to the element specified.
+func CaptureMouse(element Element) {
+	captureMouse(element.UI(), element)
+}
+
+// UncaptureMouse stops sending mouse inputs to this element set with
+// CaptureMouse. The function does nothing if this isn't the same element as
+// the one passed to CaptureMouse call.
+func UncaptureMouse(element Element) {
+	uncaptureMouse(element.UI(), element)
+}
+
+// ScreenRect returns the element's rectangle in screen coordinates.
+func ScreenRect(element Element) image.Rectangle {
+	return screenRect(element.UI(), element)
 }

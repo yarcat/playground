@@ -12,6 +12,7 @@ type EventHandler interface {
 	OnDraw(*DrawEvent)
 	OnMouseButtonPressed(*MouseButtonPressedEvent)
 	OnMouseButtonReleased(*MouseButtonReleasedEvent)
+	OnMousePosition(*MousePositionEvent)
 }
 
 // SendEvent sends the event to the element.
@@ -37,6 +38,16 @@ type MouseButtonReleasedEvent struct {
 // DispatchEvent calls EventHandler.OnMouseButtonReleased.
 func (evt *MouseButtonReleasedEvent) DispatchEvent(d EventHandler) {
 	d.OnMouseButtonReleased(evt)
+}
+
+// MousePositionEvent is sent to update cursor position.
+type MousePositionEvent struct {
+	Cursor image.Point
+}
+
+// DispatchEvent calls EventHandler.OnMousePosition.
+func (evt *MousePositionEvent) DispatchEvent(d EventHandler) {
+	d.OnMousePosition(evt)
 }
 
 // DrawEvent is sent to elements when they need to draw themselves.

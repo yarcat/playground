@@ -52,3 +52,7 @@ func (e *elementImpl) OnMouseButtonPressed(*MouseButtonPressedEvent) {}
 // OnMouseButtonPressed handles mouse button release notifications.
 // This method shouldn't be executed directly.
 func (e *elementImpl) OnMouseButtonReleased(*MouseButtonReleasedEvent) {}
+
+// OmMousePosition handles mouse position updates.
+// This method shouldn't be executed directly.
+func (e *elementImpl) OnMousePosition(*MousePositionEvent) {}

@@ -127,3 +127,11 @@ func elementAt(ui *UI, point image.Point) (Element, image.Rectangle) {
 	}
 	return underPoint[0], screenRect(ui, underPoint[0])
 }
+
+func captureMouse(ui *UI, element Element) {
+	ui.mouse.captureMouse(element)
+}
+
+func uncaptureMouse(ui *UI, element Element) {
+	ui.mouse.uncaptureMouse(element)
+}
