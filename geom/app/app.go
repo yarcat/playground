@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 // NewApp returns new application instance with initialized logical window width
@@ -16,7 +15,10 @@ func NewApp(width, height int) *App {
 		width:  width,
 		height: height,
 	}
-	app.Window = NewWindowImpl(app, nil)
+	app.Window = NewWindowImpl(
+		app,
+		nil, /* parent */
+	)
 	return app
 }
 
@@ -31,16 +33,37 @@ type App struct {
 	width, height int
 }
 
-// Update updates a by one tick. The image provided is ignored.
-func (a App) Update(screen *ebiten.Image) error { return nil }
+// Run executes main application loop. It dispatches events, updates
+// the world, etc.
+func Run(a *App) error {
+	return ebiten.RunGame((*gameAdapter)(a))
 
-// Draw draws the app screen by one frame.
-func (a App) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, "Hello, world!")
 }
 
-// Layout accepts a native outside size in device-independent pixels and
-// returns the game's logical screen size.
-func (a App) Layout(outsideWidth int, outsideHeight int) (screenWidth int, screenHeight int) {
-	return a.width, a.height
+type drawable interface {
+	Draw(*ebiten.Image)
+}
+
+type gameAdapter App
+
+// Update updates the world by one frame.
+func (ga *gameAdapter) Update(screen *ebiten.Image) error { return nil }
+
+// Draw draws the world by one frame.
+func (ga gameAdapter) Draw(screen *ebiten.Image) {
+	var drawRecursively func(win Window)
+	drawRecursively = func(win Window) {
+		if d, ok := win.(drawable); ok {
+			d.Draw(screen)
+		}
+		for _, childWin := range win.Children() {
+			drawRecursively(childWin)
+		}
+	}
+	drawRecursively(App(ga))
+}
+
+// Layout accepts window dimensions and returns logical dimensions.
+func (ga gameAdapter) Layout(windowWidth, windowHeight int) (screenWidth, screenHeight int) {
+	return App(ga).width, App(ga).height
 }
