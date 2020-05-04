@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/text"
+	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component"
 	"golang.org/x/image/font"
 )
@@ -73,13 +74,17 @@ func (b *Button) SetFont(f font.Face) {
 	b.font = f
 }
 
-// Draw presents the button on the screen.
-func (b *Button) Draw(screen *ebiten.Image) {
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+// OnMousePressed is called when left mouse button is pressed or released.
+func (b *Button) OnMousePressed(evt application.MouseEvent) {
+	if evt.Pressed() {
 		b.state = Pressed
 	} else {
 		b.state = Released
 	}
+}
+
+// Draw presents the button on the screen.
+func (b *Button) Draw(screen *ebiten.Image) {
 	img := b.getImage()
 	if img == nil {
 		return

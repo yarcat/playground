@@ -5,7 +5,10 @@ import "github.com/hajimehoshi/ebiten"
 type gameAdapter App
 
 // Update updates the world by one frame.
-func (ga *gameAdapter) Update(screen *ebiten.Image) error { return nil }
+func (ga *gameAdapter) Update(screen *ebiten.Image) error {
+	(*App)(ga).mouseManager.update()
+	return nil
+}
 
 // Draw draws the world by one frame.
 func (ga gameAdapter) Draw(screen *ebiten.Image) {
