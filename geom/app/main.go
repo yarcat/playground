@@ -35,6 +35,11 @@ func main() {
 	b.SetBounds(image.Rect(100, 300, 200, 350))
 	app.AddDrawable(b)
 
+	b = button.New("Press me")
+	b.SetBounds(image.Rect(300, 320, 450, 400))
+	b.SetBgColor(color.RGBA{0x00, 0xf0, 0x00, 0xff})
+	app.AddDrawable(b)
+
 	if err := application.Run(app); err != nil {
 		log.Fatalf("RunGame failed: %v", err)
 	}

@@ -53,6 +53,11 @@ func New(text string) *Button {
 	return b
 }
 
+// SetBgColor sets background color.
+func (b *Button) SetBgColor(c color.Color) {
+	b.bgColor = c
+}
+
 // Bounds returns a rectangle in logical screen coordinates.
 func (b Button) Bounds() image.Rectangle {
 	return b.rect
