@@ -18,16 +18,16 @@ func New(width, height int) *App {
 	ebiten.SetWindowResizable(true)
 
 	app := &App{width: width, height: height}
-	app.mouseManager.app = app
+	app.gestureManager.app = app
 	return app
 }
 
 // App represents an application. It manages internal objects and present
 // the on-screen.
 type App struct {
-	width, height int
-	drawable      []component.DrawableComponent
-	mouseManager  mouseManager
+	width, height  int
+	drawable       []component.DrawableComponent
+	gestureManager gestureManagerImpl
 }
 
 // AddDrawable adds a component to the top-most container.
@@ -35,14 +35,12 @@ func (app *App) AddDrawable(c component.DrawableComponent) {
 	app.drawable = append(app.drawable, c)
 }
 
-// ComponentAt returns compotents under given window point.
-// Coordinates are given in logical window units.
-func (app App) ComponentAt(pt image.Point) []component.Component {
-	var comps []component.Component
+// ComponentAt returns a component under a window point.
+func (app App) ComponentAt(pt image.Point) component.Component {
 	for _, c := range app.drawable {
 		if pt.In(c.Bounds()) {
-			comps = append(comps, c)
+			return c
 		}
 	}
-	return comps
+	return nil
 }

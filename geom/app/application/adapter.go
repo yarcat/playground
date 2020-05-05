@@ -6,7 +6,7 @@ type gameAdapter App
 
 // Update updates the world by one frame.
 func (ga *gameAdapter) Update(screen *ebiten.Image) error {
-	(*App)(ga).mouseManager.update()
+	(*App)(ga).gestureManager.update()
 	return nil
 }
 

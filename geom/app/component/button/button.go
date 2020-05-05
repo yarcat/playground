@@ -75,7 +75,7 @@ func (b *Button) SetFont(f font.Face) {
 }
 
 // OnMousePressed is called when left mouse button is pressed or released.
-func (b *Button) OnMousePressed(evt application.MouseEvent) {
+func (b *Button) OnMousePressed(evt application.GestureEvent) {
 	if evt.Pressed() {
 		b.state = Pressed
 	} else {
