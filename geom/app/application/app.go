@@ -26,18 +26,18 @@ func New(width, height int) *App {
 // the on-screen.
 type App struct {
 	width, height  int
-	drawable       []component.DrawableComponent
+	components     []component.Component
 	gestureManager gestureManagerImpl
 }
 
-// AddDrawable adds a component to the top-most container.
-func (app *App) AddDrawable(c component.DrawableComponent) {
-	app.drawable = append(app.drawable, c)
+// AddComponent adds a component.
+func (app *App) AddComponent(c component.Component) {
+	app.components = append(app.components, c)
 }
 
 // ComponentAt returns a component under a window point.
 func (app App) ComponentAt(pt image.Point) component.Component {
-	for _, c := range app.drawable {
+	for _, c := range app.components {
 		if pt.In(c.Bounds()) {
 			return c
 		}
