@@ -8,8 +8,8 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/text"
-	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component"
+	ftrs "github.com/yarcat/playground/geom/app/component/features"
 	"golang.org/x/image/font"
 )
 
@@ -33,13 +33,14 @@ const (
 
 // Button is a clickable element.
 type Button struct {
-	rect      image.Rectangle
-	bgColor   color.Color
-	textColor color.Color
-	images    map[State]*ebiten.Image
-	state     State
-	font      font.Face
-	text      string
+	rect            image.Rectangle
+	bgColor         color.Color
+	textColor       color.Color
+	images          map[State]*ebiten.Image
+	state           State
+	font            font.Face
+	text            string
+	actionListeners []func()
 }
 
 // New returns new Button instance.
@@ -55,10 +56,42 @@ func New(text string) *Button {
 }
 
 // HandleAdded is called after the button is added to its parent.
-func (b *Button) HandleAdded(parent component.Component, features *component.Features) {
+func (b *Button) HandleAdded(parent component.Component, features *ftrs.Features) {
 	features.Add(
-		component.Draw(b.draw),
+		ftrs.Draw(b.draw),
+		ftrs.ListenMouseButtons(func(evt ftrs.GestureEvent) {
+			if evt.Pressed() {
+				b.state = Pressed
+			} else {
+				b.state = Released
+			}
+		}),
+		ftrs.ListenAction(func() {
+			for _, fn := range b.actionListeners {
+				fn()
+			}
+		}),
 	)
+}
+
+func (b *Button) invalidate() {
+	for k, img := range b.images {
+		if img != nil {
+			img.Dispose()
+		}
+		delete(b.images, k)
+	}
+}
+
+// SetText sets button text.
+func (b *Button) SetText(text string) {
+	b.text = text
+	b.invalidate()
+}
+
+// AddActionListener registers action listener callback.
+func (b *Button) AddActionListener(fn func()) {
+	b.actionListeners = append(b.actionListeners, fn)
 }
 
 // SetBgColor sets background color.
@@ -79,15 +112,6 @@ func (b *Button) SetBounds(rect image.Rectangle) {
 // SetFont sets the font.
 func (b *Button) SetFont(f font.Face) {
 	b.font = f
-}
-
-// OnMousePressed is called when left mouse button is pressed or released.
-func (b *Button) OnMousePressed(evt application.GestureEvent) {
-	if evt.Pressed() {
-		b.state = Pressed
-	} else {
-		b.state = Released
-	}
 }
 
 // draw presents the button on the screen.

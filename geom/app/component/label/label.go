@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
 	"github.com/yarcat/playground/geom/app/component"
+	ftrs "github.com/yarcat/playground/geom/app/component/features"
 	"golang.org/x/image/font"
 )
 
@@ -46,10 +47,8 @@ func New(text string) *Label {
 }
 
 // HandleAdded is called right after this component is added to its parent.
-func (l *Label) HandleAdded(parent component.Component, features *component.Features) {
-	features.Add(
-		component.Draw(l.draw),
-	)
+func (l *Label) HandleAdded(parent component.Component, features *ftrs.Features) {
+	features.Add(ftrs.Draw(l.draw))
 }
 
 // SetBgColor sets background color.

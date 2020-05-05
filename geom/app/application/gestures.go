@@ -5,7 +5,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/inpututil"
-	"github.com/yarcat/playground/geom/app/component"
+	ftrs "github.com/yarcat/playground/geom/app/component/features"
 )
 
 // gestureManagerImpl provides functionality that helps to handle mouse and touch screen.
@@ -15,28 +15,19 @@ type gestureManagerImpl struct {
 }
 
 type mouseState struct {
-	comp component.Component
+	features *ftrs.Features
 	// stateFn is a state handler function executed in update.
 	stateFn func() (keep bool)
 }
 
-func newMouseState(comp component.Component) *mouseState {
-	s := &mouseState{comp: comp}
+func newMouseState(features *ftrs.Features) *mouseState {
+	s := &mouseState{features: features}
 	s.stateFn = s.sendPressed
 	return s
 }
 
-func (state *mouseState) send() {
-	type handler interface {
-		OnMousePressed(GestureEvent)
-	}
-	if comp, ok := state.comp.(handler); ok {
-		comp.OnMousePressed(state)
-	}
-}
-
 func (state *mouseState) sendPressed() (keep bool) {
-	state.send()
+	state.features.NotifyMouseButtons(state)
 	state.stateFn = state.sendReleased
 	return true
 }
@@ -45,7 +36,8 @@ func (state *mouseState) sendReleased() (keep bool) {
 	if !inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 		return true
 	}
-	state.send()
+	state.features.NotifyMouseButtons(state)
+	state.features.NotifyAction()
 	return false
 }
 
@@ -62,12 +54,6 @@ func (state mouseState) Pos() image.Point {
 // Pressed returns whether the left button is pressed.
 func (state mouseState) Pressed() bool {
 	return ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
-}
-
-// GestureEvent represents a generic mouse or touch event.
-type GestureEvent interface {
-	Pressed() bool
-	Pos() image.Point
 }
 
 type gestureEventImpl struct {
@@ -88,8 +74,9 @@ func (evt gestureEventImpl) Pos() image.Point {
 func (m *gestureManagerImpl) update() {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		comp := m.app.ComponentAt(image.Pt(ebiten.CursorPosition()))
-		if comp != nil {
-			m.states = append(m.states, newMouseState(comp))
+		f := m.app.features[comp]
+		if f.ListensMouseButtons() {
+			m.states = append(m.states, newMouseState(f))
 		}
 	}
 

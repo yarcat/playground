@@ -7,6 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/yarcat/playground/geom/app/component"
+	ftrs "github.com/yarcat/playground/geom/app/component/features"
 )
 
 // New returns new application instance with initialized logical window width
@@ -20,7 +21,7 @@ func New(width, height int) *App {
 	app := &App{
 		width:    width,
 		height:   height,
-		features: make(map[component.Component]*component.Features),
+		features: make(map[component.Component]*ftrs.Features),
 	}
 	app.gestureManager.app = app
 	return app
@@ -32,13 +33,13 @@ type App struct {
 	width, height  int
 	components     []component.Component
 	gestureManager gestureManagerImpl
-	features       map[component.Component]*component.Features
+	features       map[component.Component]*ftrs.Features
 }
 
 // AddComponent adds a component and fires life-cycle events.
 func (app *App) AddComponent(c component.WithLifecycle) {
 	app.components = append(app.components, c)
-	features := &component.Features{}
+	features := &ftrs.Features{}
 	app.features[c] = features
 	// TODO(yarcat): Parent must not be nil.
 	c.HandleAdded(nil /* parent */, features)

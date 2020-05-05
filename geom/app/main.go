@@ -38,6 +38,9 @@ func main() {
 	b = button.New("Press me")
 	b.SetBounds(image.Rect(300, 320, 450, 400))
 	b.SetBgColor(color.RGBA{0x00, 0xf0, 0x00, 0xff})
+	b.AddActionListener(func() {
+		b.SetText("Yeah!")
+	})
 	app.AddComponent(b)
 
 	if err := application.Run(app); err != nil {

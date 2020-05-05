@@ -2,6 +2,8 @@ package component
 
 import (
 	"image"
+
+	"github.com/yarcat/playground/geom/app/component/features"
 )
 
 // Component represents an abstract rectangular UI element.
@@ -17,5 +19,5 @@ type WithLifecycle interface {
 	Component
 	// HandleAdded is called right after the component was added to its parent.
 	// A callee should use provided features object to register component functionality.
-	HandleAdded(parent Component, features *Features)
+	HandleAdded(parent Component, features *features.Features)
 }
