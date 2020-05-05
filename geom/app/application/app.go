@@ -17,7 +17,11 @@ func New(width, height int) *App {
 	ebiten.SetWindowFloating(true)
 	ebiten.SetWindowResizable(true)
 
-	app := &App{width: width, height: height}
+	app := &App{
+		width:    width,
+		height:   height,
+		features: make(map[component.Component]*component.Features),
+	}
 	app.gestureManager.app = app
 	return app
 }
@@ -28,11 +32,16 @@ type App struct {
 	width, height  int
 	components     []component.Component
 	gestureManager gestureManagerImpl
+	features       map[component.Component]*component.Features
 }
 
-// AddComponent adds a component.
-func (app *App) AddComponent(c component.Component) {
+// AddComponent adds a component and fires life-cycle events.
+func (app *App) AddComponent(c component.WithLifecycle) {
 	app.components = append(app.components, c)
+	features := &component.Features{}
+	app.features[c] = features
+	// TODO(yarcat): Parent must not be nil.
+	c.HandleAdded(nil /* parent */, features)
 }
 
 // ComponentAt returns a component under a window point.

@@ -54,6 +54,13 @@ func New(text string) *Button {
 	return b
 }
 
+// HandleAdded is called after the button is added to its parent.
+func (b *Button) HandleAdded(parent component.Component, features *component.Features) {
+	features.Add(
+		component.Draw(b.draw),
+	)
+}
+
 // SetBgColor sets background color.
 func (b *Button) SetBgColor(c color.Color) {
 	b.bgColor = c
@@ -83,8 +90,8 @@ func (b *Button) OnMousePressed(evt application.GestureEvent) {
 	}
 }
 
-// Draw presents the button on the screen.
-func (b *Button) Draw(screen *ebiten.Image) {
+// draw presents the button on the screen.
+func (b *Button) draw(screen *ebiten.Image) {
 	img := b.getImage()
 	if img == nil {
 		return

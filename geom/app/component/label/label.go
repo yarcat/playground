@@ -45,6 +45,13 @@ func New(text string) *Label {
 	}
 }
 
+// HandleAdded is called right after this component is added to its parent.
+func (l *Label) HandleAdded(parent component.Component, features *component.Features) {
+	features.Add(
+		component.Draw(l.draw),
+	)
+}
+
 // SetBgColor sets background color.
 func (l *Label) SetBgColor(c color.Color) {
 	l.bgColor = c
@@ -75,8 +82,8 @@ func (l *Label) SetBounds(rect image.Rectangle) {
 	l.rect = rect
 }
 
-// Draw draws the label.
-func (l *Label) Draw(screen *ebiten.Image) {
+// draw draws the label.
+func (l *Label) draw(screen *ebiten.Image) {
 	image := l.getImage()
 	if image == nil {
 		return
