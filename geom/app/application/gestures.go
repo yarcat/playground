@@ -15,8 +15,9 @@ type gestureManagerImpl struct {
 }
 
 type mouseState struct {
-	comp    component.Component
-	stateFn func() bool
+	comp component.Component
+	// stateFn is a state handler function executed in update.
+	stateFn func() (keep bool)
 }
 
 func newMouseState(comp component.Component) *mouseState {
@@ -26,7 +27,10 @@ func newMouseState(comp component.Component) *mouseState {
 }
 
 func (state *mouseState) send() {
-	if comp, ok := state.comp.(mousePressedHandler); ok {
+	type handler interface {
+		OnMousePressed(GestureEvent)
+	}
+	if comp, ok := state.comp.(handler); ok {
 		comp.OnMousePressed(state)
 	}
 }
@@ -79,14 +83,6 @@ func (evt gestureEventImpl) Pressed() bool {
 // Pos returns cursor position.
 func (evt gestureEventImpl) Pos() image.Point {
 	return evt.pos
-}
-
-type mousePressedHandler interface {
-	OnMousePressed(GestureEvent)
-}
-
-type mouseClickedHandler interface {
-	OnMouseClicked(GestureEvent)
 }
 
 func (m *gestureManagerImpl) update() {
