@@ -38,6 +38,7 @@ type Button struct {
 	textColor       color.Color
 	images          map[State]*ebiten.Image
 	state           State
+	entered         bool
 	font            font.Face
 	text            string
 	actionListeners []func()
@@ -70,6 +71,12 @@ func (b *Button) HandleAdded(parent component.Component, features *ftrs.Features
 			for _, fn := range b.actionListeners {
 				fn()
 			}
+		}),
+		ftrs.ListenMouseEnter(func(evt ftrs.MotionEvent) {
+			b.entered = true
+		}),
+		ftrs.ListenMouseLeave(func(evt ftrs.MotionEvent) {
+			b.entered = false
 		}),
 	)
 }
@@ -126,7 +133,7 @@ func (b *Button) draw(screen *ebiten.Image) {
 }
 
 func (b *Button) getImage() *ebiten.Image {
-	if image, ok := b.images[b.state]; ok {
+	if image, ok := b.images[b.drawState()]; ok {
 		return image
 	}
 
@@ -136,13 +143,13 @@ func (b *Button) getImage() *ebiten.Image {
 	w, h := bounds(b.font, b.text)
 	x, y := (b.rect.Dx()-w)/2, (b.rect.Dy()+h)/2
 	var tx, ty int
-	if b.state == Pressed {
+	if b.drawState() == Pressed {
 		tx, ty = 1, 1
 	}
 	text.Draw(image, b.text, b.font, x+tx, y+ty, b.textColor)
 
 	x1, y1 := float64(b.rect.Dx()), float64(b.rect.Dy())
-	if b.state == Released {
+	if b.drawState() == Released {
 		// TODO(yarcat): Replace white with smth configurable.
 		ebitenutil.DrawLine(image, 0, 0, x1, 0, color.White)
 		ebitenutil.DrawLine(image, 1, 0, 1, y1, color.White)
@@ -150,6 +157,13 @@ func (b *Button) getImage() *ebiten.Image {
 
 	b.images[b.state] = image
 	return image
+}
+
+func (b *Button) drawState() State {
+	if b.state == Pressed && b.entered {
+		return Pressed
+	}
+	return Released
 }
 
 func bounds(f font.Face, t string) (width, height int) {

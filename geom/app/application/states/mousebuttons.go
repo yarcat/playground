@@ -36,8 +36,8 @@ func NewMouseButtonState(host MouseButtonStateHost, features *ftrs.Features) Mou
 // Released notifies the state that a mouse button was released. It notifies
 // mouse button state using features and attempts to remove itself.
 func (state *mouseButtonState) Released(features *ftrs.Features) {
+	state.features.NotifyMouseButtons(state.host.GestureEvent())
 	if state.features == features {
-		state.features.NotifyMouseButtons(state.host.GestureEvent())
 		state.features.NotifyAction()
 	}
 	state.host.RemoveMouseButtonState(state)

@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/yarcat/playground/geom/app/application/states"
 	"github.com/yarcat/playground/geom/app/component"
 	ftrs "github.com/yarcat/playground/geom/app/component/features"
 )
@@ -23,7 +24,10 @@ func New(width, height int) *App {
 		height:   height,
 		features: make(map[component.Component]*ftrs.Features),
 	}
-	app.gestureManager.app = app
+	app.gestureManager = gestureManagerImpl{
+		app:     app,
+		motions: make(map[*ftrs.Features]*states.MouseMotionState),
+	}
 	return app
 }
 

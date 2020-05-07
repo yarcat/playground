@@ -14,10 +14,25 @@ import (
 type gestureManagerImpl struct {
 	app                  *App
 	states, removeStates []states.MouseButtonState
+	motions              map[*features.Features]*states.MouseMotionState
 }
 
 func (m *gestureManagerImpl) update() {
 	underCursor := &underCursor{app: m.app}
+
+	if underCursor.features().ListensMouseMotion() {
+		if _, ok := m.motions[underCursor.features()]; !ok {
+			m.motions[underCursor.features()] = &states.MouseMotionState{
+				Host:      (*motionHostAdapter)(m),
+				Component: underCursor.component(),
+				Features:  underCursor.features(),
+			}
+		}
+	}
+	pt := image.Pt(ebiten.CursorPosition())
+	for _, state := range m.motions {
+		state.Update(pt)
+	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		if underCursor.features().ListensMouseButtons() {
@@ -60,4 +75,16 @@ func (evt gestureEvent) Pos() image.Point {
 // Pressed returns whether left mouse button is pressed.
 func (evt gestureEvent) Pressed() bool {
 	return ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+}
+
+type motionHostAdapter gestureManagerImpl
+
+// RemoveMouseButtonState unregisters the state provided.
+func (adap *motionHostAdapter) RemoveMouseMotionState(state *states.MouseMotionState) {
+	delete((*gestureManagerImpl)(adap).motions, state.Features)
+}
+
+// MotionEvent returns a motion event instance.
+func (*motionHostAdapter) MotionEvent() features.MotionEvent {
+	return nil
 }
