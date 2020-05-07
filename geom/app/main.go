@@ -35,11 +35,14 @@ func main() {
 	b.SetBounds(image.Rect(100, 300, 200, 350))
 	app.AddComponent(b)
 
-	b = button.New("Press me")
+	lbls := [...]string{"Press me", "Yeah!", "Do it again!"}
+	lblN := 0
+	b = button.New(lbls[lblN])
 	b.SetBounds(image.Rect(300, 320, 450, 400))
 	b.SetBgColor(color.RGBA{0x00, 0xf0, 0x00, 0xff})
 	b.AddActionListener(func() {
-		b.SetText("Yeah!")
+		lblN = (lblN + 1) % len(lbls)
+		b.SetText(lbls[lblN])
 	})
 	app.AddComponent(b)
 
