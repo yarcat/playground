@@ -34,14 +34,14 @@ func (state *MouseMotionState) Update(pt image.Point) {
 		if state.Features.ListensMouseEnter() {
 			state.Features.NotifyMouseEnter(state.Host.MotionEvent())
 		}
-	} else {
-		if state.Features.ListensMouseLeave() {
-			state.Features.NotifyMouseLeave(state.Host.MotionEvent())
-			// We don't really have to remove it until the component is removed, or
-			// it's reconfigured to stop receiving motion notifications. But I'm doing
-			// this to ensure there will be no memory leaks in the future, if I decide
-			// to add/change some functionality.
-			state.Host.RemoveMouseMotionState(state)
-		}
+		return
 	}
+	if state.Features.ListensMouseLeave() {
+		state.Features.NotifyMouseLeave(state.Host.MotionEvent())
+	}
+	// We don't really have to remove it until the component is removed, or
+	// it's reconfigured to stop receiving motion notifications. But I'm doing
+	// this to ensure there will be no memory leaks in the future, if I decide
+	// to add/change some functionality.
+	state.Host.RemoveMouseMotionState(state)
 }
