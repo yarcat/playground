@@ -45,16 +45,43 @@ func (app *App) AddComponent(c component.WithLifecycle) {
 	app.components = append(app.components, c)
 	features := &ftrs.Features{}
 	app.features[c] = features
-	// TODO(yarcat): Parent must not be nil.
-	c.HandleAdded(nil /* parent */, features)
+	c.HandleAdded(app /* parent */, features)
+}
+
+// CloserToUser makes a component be drawn later. This makes it drawn on top of
+// other components, and also ensures ComponentAt returns is if components overlap.
+func (app *App) CloserToUser(c component.Component) {
+	n := 0
+	for _, v := range app.components {
+		if v != c {
+			app.components[n] = v
+			n++
+		}
+	}
+	if n < len(app.components) {
+		app.components[n] = c
+		n++
+	}
+	app.components = app.components[:n]
 }
 
 // ComponentAt returns a component under a window point.
 func (app App) ComponentAt(pt image.Point) component.Component {
-	for _, c := range app.components {
+	for i := len(app.components) - 1; i >= 0; i-- {
+		c := app.components[i]
 		if pt.In(c.Bounds()) {
 			return c
 		}
 	}
 	return nil
+}
+
+// Bounds returns application window rectangle in logical screen coordinates.
+func (App) Bounds() image.Rectangle {
+	panic("not implemented")
+}
+
+// SetBounds sets application window rectangle in logical screen coordinates.
+func (App) SetBounds(image.Rectangle) {
+	panic("not implemented")
 }
