@@ -45,18 +45,18 @@ func (state *MouseDragState) Update(pt image.Point) {
 	if pt.Eq(state.cursor) {
 		return
 	}
+	delta := pt.Sub(state.cursor)
 	if !state.drag {
-		ptMod2 := pt.X*pt.X + pt.Y*pt.Y
-		curMod2 := state.cursor.X*state.cursor.X + state.cursor.Y*state.cursor.Y
-		d4 := curMod2 - ptMod2
-		d4 = d4 * d4
-		if d4 < 10000 { // TODO(yarcat): Make this configurable.
+		// TODO(yarcat): Make this configurable.
+		const minDragToDetectSqr = 100
+		len2 := delta.X*delta.X + delta.Y*delta.Y
+		if len2 < minDragToDetectSqr {
 			return
 		}
 		state.drag = true
 		state.action.Reset()
 	}
-	evt := state.host.DragEvent(pt.Sub(state.cursor), ftrs.DragStateDragged)
+	evt := state.host.DragEvent(delta, ftrs.DragStateDragged)
 	state.cursor = pt
 	state.features.NotifyDrag(evt)
 }
