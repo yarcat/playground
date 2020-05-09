@@ -13,8 +13,9 @@ import (
 // touch screen.
 type gestureManagerImpl struct {
 	app                  *App
-	states, removeStates []states.MouseButtonState
+	states, removeStates []*states.MouseButtonState
 	motions              map[*features.Features]*states.MouseMotionState
+	drags, removeDrags   []*states.MouseDragState
 }
 
 func (m *gestureManagerImpl) update() {
@@ -35,10 +36,20 @@ func (m *gestureManagerImpl) update() {
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-		if underCursor.features().ListensMouseButtons() {
+		f := underCursor.features()
+		var action *states.Callback
+		if f.ListensMouseButtons() || f.ListensDrag() {
+			action = states.NewCallback(f.NotifyAction)
+		}
+		if f.ListensDrag() {
+			state := states.NewMouseDragState(
+				(*removerAdapter)(m), underCursor.features(), action)
+			m.drags = append(m.drags, state)
+		}
+		if f.ListensMouseButtons() {
 			underCursor.features().NotifyMouseButtons(gestureEvent{})
 			state := states.NewMouseButtonState(
-				(*removerAdapter)(m), underCursor.features())
+				(*removerAdapter)(m), underCursor.features(), action)
 			m.states = append(m.states, state)
 		}
 	}
@@ -51,17 +62,29 @@ func (m *gestureManagerImpl) update() {
 
 	m.states = removeStates(m.states, m.removeStates)
 	m.removeStates = m.removeStates[:0]
+
+	m.drags = removeDrags(m.drags, m.removeDrags)
+	m.removeDrags = m.removeDrags[:0]
 }
 
 type removerAdapter gestureManagerImpl
 
-func (ra *removerAdapter) RemoveMouseButtonState(state states.MouseButtonState) {
+func (ra *removerAdapter) RemoveMouseButtonState(state *states.MouseButtonState) {
 	(*gestureManagerImpl)(ra).removeStates = append(
 		(*gestureManagerImpl)(ra).removeStates, state)
 }
 
+func (ra *removerAdapter) RemoveMouseDragState(state *states.MouseDragState) {
+	(*gestureManagerImpl)(ra).removeDrags = append(
+		(*gestureManagerImpl)(ra).removeDrags, state)
+}
+
 func (ra removerAdapter) GestureEvent() features.GestureEvent {
 	return gestureEvent{}
+}
+
+func (ra removerAdapter) DragEvent(delta image.Point, state features.DragState) features.DragEvent {
+	return dragEvent{delta: delta, state: state}
 }
 
 // TODO(yarcat): Move this to a better place.
@@ -75,6 +98,25 @@ func (evt gestureEvent) Pos() image.Point {
 // Pressed returns whether left mouse button is pressed.
 func (evt gestureEvent) Pressed() bool {
 	return ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+}
+
+// TODO(yarcat): Move this to a better place.
+type dragEvent struct {
+	delta image.Point
+	state features.DragState
+}
+
+// D returns a relative cursor motion since the last time the event was triggered.
+func (evt dragEvent) D() image.Point {
+	return evt.delta
+}
+
+func (dragEvent) Pos() image.Point {
+	return image.Pt(ebiten.CursorPosition())
+}
+
+func (evt dragEvent) State() features.DragState {
+	return evt.state
 }
 
 type motionHostAdapter gestureManagerImpl

@@ -7,6 +7,7 @@ import (
 
 	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component/button"
+	"github.com/yarcat/playground/geom/app/component/drag"
 	"github.com/yarcat/playground/geom/app/component/label"
 )
 
@@ -28,7 +29,7 @@ func main() {
 		l.SetBounds(image.Rect(x, y, x+len(s)*20, y+20))
 		l.SetBgColor(data.color)
 		l.SetHAlign(data.halign)
-		app.AddComponent(l)
+		app.AddComponent(drag.EnableFor(l))
 	}
 
 	b := button.New("Press me")

@@ -31,7 +31,22 @@ func (uc *underCursor) component() component.Component {
 	return uc.c
 }
 
-func removeStates(states, remove []states.MouseButtonState) []states.MouseButtonState {
+func removeStates(states, remove []*states.MouseButtonState) []*states.MouseButtonState {
+	n := 0
+outer:
+	for _, s := range states {
+		for _, r := range remove {
+			if r == s {
+				continue outer
+			}
+		}
+		states[n] = s
+		n++
+	}
+	return states[:n]
+}
+
+func removeDrags(states, remove []*states.MouseDragState) []*states.MouseDragState {
 	n := 0
 outer:
 	for _, s := range states {

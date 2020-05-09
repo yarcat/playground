@@ -14,6 +14,7 @@ type Features struct {
 	mouseButtonListenerFn      MouseButtonListener
 	actionListenerFn           ActionListener
 	mouseEnterFn, mouseLeaveFn MotionListener
+	dragFn                     DragListener
 }
 
 // FeatureOption is a function that can update concrete feature in the set of features.

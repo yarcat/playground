@@ -1,44 +1,39 @@
-// Package states contains various internal states e.g. mouse, keyboard, etc.
 package states
 
 import (
 	ftrs "github.com/yarcat/playground/geom/app/component/features"
 )
 
-// MouseButtonState represent left button state.
-type MouseButtonState interface {
-	// Released should be called right after a button was released. It accepts
-	// component features under mouse cursor.
-	Released(underCursor *ftrs.Features)
-}
-
 // MouseButtonStateHost is an object that can remove/unregister mouse button
 // states.
 type MouseButtonStateHost interface {
-	RemoveMouseButtonState(MouseButtonState)
+	RemoveMouseButtonState(*MouseButtonState)
 	GestureEvent() ftrs.GestureEvent
 }
 
-type mouseButtonState struct {
+// MouseButtonState sends mouse button notifications.
+type MouseButtonState struct {
 	host     MouseButtonStateHost
 	features *ftrs.Features
+	action   *Callback
 }
 
 // NewMouseButtonState returns new mouse button state instance. It usually makes
 // sense to call its Pressed or Released method after creating.
-func NewMouseButtonState(host MouseButtonStateHost, features *ftrs.Features) MouseButtonState {
-	return &mouseButtonState{
+func NewMouseButtonState(host MouseButtonStateHost, features *ftrs.Features, action *Callback) *MouseButtonState {
+	return &MouseButtonState{
 		host:     host,
 		features: features,
+		action:   action,
 	}
 }
 
 // Released notifies the state that a mouse button was released. It notifies
 // mouse button state using features and attempts to remove itself.
-func (state *mouseButtonState) Released(features *ftrs.Features) {
+func (state *MouseButtonState) Released(features *ftrs.Features) {
 	state.features.NotifyMouseButtons(state.host.GestureEvent())
 	if state.features == features {
-		state.features.NotifyAction()
+		state.action.Run()
 	}
 	state.host.RemoveMouseButtonState(state)
 }
