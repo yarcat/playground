@@ -18,15 +18,18 @@ type MouseDragState struct {
 	host     MouseDragStateHost
 	features *ftrs.Features
 	action   *Callback
+	cursor   image.Point
+	drag     bool
 }
 
 // NewMouseDragState returns new mouse drag state instance. The instance resets
 // (disables) action callback if mouse drag was detected.
-func NewMouseDragState(host MouseDragStateHost, features *ftrs.Features, action *Callback) *MouseDragState {
+func NewMouseDragState(host MouseDragStateHost, features *ftrs.Features, action *Callback, cursor image.Point) *MouseDragState {
 	return &MouseDragState{
 		host:     host,
 		features: features,
 		action:   action,
+		cursor:   cursor,
 	}
 }
 
@@ -38,4 +41,22 @@ func (state *MouseDragState) Released(features *ftrs.Features) {
 
 // Update handles mouse motion changes and decides whether DragStateDragged
 // should be sent out.
-func (state *MouseDragState) Update(pt image.Point) {}
+func (state *MouseDragState) Update(pt image.Point) {
+	if pt.Eq(state.cursor) {
+		return
+	}
+	if !state.drag {
+		ptMod2 := pt.X*pt.X + pt.Y*pt.Y
+		curMod2 := state.cursor.X*state.cursor.X + state.cursor.Y*state.cursor.Y
+		d4 := curMod2 - ptMod2
+		d4 = d4 * d4
+		if d4 < 10000 { // TODO(yarcat): Make this configurable.
+			return
+		}
+		state.drag = true
+		state.action.Reset()
+	}
+	evt := state.host.DragEvent(pt.Sub(state.cursor), ftrs.DragStateDragged)
+	state.cursor = pt
+	state.features.NotifyDrag(evt)
+}

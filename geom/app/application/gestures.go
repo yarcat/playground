@@ -34,6 +34,9 @@ func (m *gestureManagerImpl) update() {
 	for _, state := range m.motions {
 		state.Update(pt)
 	}
+	for _, state := range m.drags {
+		state.Update(pt)
+	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		f := underCursor.features()
@@ -43,7 +46,7 @@ func (m *gestureManagerImpl) update() {
 		}
 		if f.ListensDrag() {
 			state := states.NewMouseDragState(
-				(*removerAdapter)(m), underCursor.features(), action)
+				(*removerAdapter)(m), underCursor.features(), action, pt)
 			m.drags = append(m.drags, state)
 		}
 		if f.ListensMouseButtons() {
@@ -57,6 +60,9 @@ func (m *gestureManagerImpl) update() {
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 		for _, mstate := range m.states {
 			mstate.Released(underCursor.features())
+		}
+		for _, state := range m.drags {
+			state.Released(underCursor.features())
 		}
 	}
 

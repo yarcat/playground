@@ -2,6 +2,8 @@
 package drag
 
 import (
+	"log"
+
 	"github.com/yarcat/playground/geom/app/component"
 	ftrs "github.com/yarcat/playground/geom/app/component/features"
 )
@@ -25,6 +27,8 @@ func EnableFor(c component.WithLifecycle) *Drag {
 func (d *Drag) HandleAdded(parent component.Component, features *ftrs.Features) {
 	d.WithLifecycle.HandleAdded(parent, features)
 	features.Add(
-		ftrs.ListenDrag(func(evt ftrs.DragEvent) {}),
+		ftrs.ListenDrag(func(evt ftrs.DragEvent) {
+			log.Println("drag:", evt)
+		}),
 	)
 }
