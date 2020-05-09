@@ -8,6 +8,7 @@ import (
 	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component/button"
 	"github.com/yarcat/playground/geom/app/component/drag"
+	"github.com/yarcat/playground/geom/app/component/features"
 	"github.com/yarcat/playground/geom/app/component/label"
 )
 
@@ -34,17 +35,27 @@ func main() {
 
 	b := button.New("Press me")
 	b.SetBounds(image.Rect(100, 300, 200, 350))
-	app.AddComponent(b)
+	b.AddActionListener(func(b *button.Button) features.ActionListener {
+		labels := [...]string{"Press me", "Drag me"}
+		n := 0
+		return func() {
+			n = (n + 1) % len(labels)
+			b.SetText(labels[n])
+		}
+	}(b))
+	app.AddComponent(drag.EnableFor(b))
 
-	lbls := [...]string{"Press me", "Yeah!", "Do it again!"}
-	lblN := 0
-	b = button.New(lbls[lblN])
+	b = button.New("Press me")
 	b.SetBounds(image.Rect(300, 320, 450, 400))
 	b.SetBgColor(color.RGBA{0x00, 0xf0, 0x00, 0xff})
-	b.AddActionListener(func() {
-		lblN = (lblN + 1) % len(lbls)
-		b.SetText(lbls[lblN])
-	})
+	b.AddActionListener(func(b *button.Button) features.ActionListener {
+		labels := [...]string{"Press me", "Yeah!", "Do it again!"}
+		n := 0
+		return func() {
+			n = (n + 1) % len(labels)
+			b.SetText(labels[n])
+		}
+	}(b))
 	app.AddComponent(b)
 
 	if err := application.Run(app); err != nil {
