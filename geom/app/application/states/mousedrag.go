@@ -37,6 +37,9 @@ func NewMouseDragState(host MouseDragStateHost, features *ftrs.Features, action 
 // drag was detected. The state also removes itself from the host.
 func (state *MouseDragState) Released(features *ftrs.Features) {
 	state.host.RemoveMouseDragState(state)
+	if !state.drag {
+		return
+	}
 	evt := state.host.DragEvent(image.Point{}, ftrs.DragStateEnded)
 	state.features.NotifyDrag(evt)
 }
