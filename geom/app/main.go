@@ -83,6 +83,6 @@ func main() {
 	app.AddComponent(drag.EnableFor(r))
 
 	if err := application.Run(app); err != nil {
-		log.Fatalf("RunGame failed: %v", err)
+		log.Fatalf("Run failed: %v", err)
 	}
 }
