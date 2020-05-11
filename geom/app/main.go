@@ -11,6 +11,7 @@ import (
 	"github.com/yarcat/playground/geom/app/component/drag"
 	"github.com/yarcat/playground/geom/app/component/features"
 	"github.com/yarcat/playground/geom/app/component/label"
+	"github.com/yarcat/playground/geom/shapes"
 )
 
 func main() {
@@ -61,11 +62,25 @@ func main() {
 
 	c := canvas.New(func(img *canvas.Image) {
 		if img.Invalidated() {
-			img.Fill(color.White)
+			w, h := img.Size()
+			d := w
+			if h < d {
+				d = h
+			}
+			shapes.DrawCircle(img.Image, w/2, h/2, d/2, color.White)
 		}
 	})
 	c.SetBounds(image.Rect(500, 500, 600, 600))
 	app.AddComponent(drag.EnableFor(c))
+
+	r := canvas.New(func(img *canvas.Image) {
+		if img.Invalidated() {
+			w, h := img.Size()
+			shapes.DrawRectangle(img.Image, w, h, color.White)
+		}
+	})
+	r.SetBounds(image.Rect(500, 500, 600, 600))
+	app.AddComponent(drag.EnableFor(r))
 
 	if err := application.Run(app); err != nil {
 		log.Fatalf("RunGame failed: %v", err)
