@@ -42,6 +42,7 @@ type Button struct {
 	font            font.Face
 	text            string
 	actionListeners []func()
+	dragged         bool
 }
 
 // New returns new Button instance.
@@ -77,6 +78,9 @@ func (b *Button) HandleAdded(parent component.Component, features *ftrs.Features
 		}),
 		ftrs.ListenMouseLeave(func(evt ftrs.MotionEvent) {
 			b.entered = false
+		}),
+		ftrs.ListenDrag(func(evt ftrs.DragEvent) {
+			b.dragged = evt.State() != ftrs.DragStateEnded
 		}),
 	)
 }
@@ -160,7 +164,7 @@ func (b *Button) getImage() *ebiten.Image {
 }
 
 func (b *Button) drawState() State {
-	if b.state == Pressed && b.entered {
+	if b.state == Pressed && b.entered && !b.dragged {
 		return Pressed
 	}
 	return Released
