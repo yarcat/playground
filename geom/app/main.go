@@ -7,6 +7,7 @@ import (
 
 	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component/button"
+	"github.com/yarcat/playground/geom/app/component/canvas"
 	"github.com/yarcat/playground/geom/app/component/drag"
 	"github.com/yarcat/playground/geom/app/component/features"
 	"github.com/yarcat/playground/geom/app/component/label"
@@ -57,6 +58,14 @@ func main() {
 		}
 	}(b))
 	app.AddComponent(b)
+
+	c := canvas.New(func(img *canvas.Image) {
+		if img.Invalidated() {
+			img.Fill(color.White)
+		}
+	})
+	c.SetBounds(image.Rect(500, 500, 600, 600))
+	app.AddComponent(drag.EnableFor(c))
 
 	if err := application.Run(app); err != nil {
 		log.Fatalf("RunGame failed: %v", err)
