@@ -20,7 +20,7 @@ func DefaultFont() font.Face {
 		}
 		const dpi = 72
 		defaultFont = truetype.NewFace(tt, &truetype.Options{
-			Size:    12,
+			Size:    9,
 			DPI:     dpi,
 			Hinting: font.HintingFull,
 		})

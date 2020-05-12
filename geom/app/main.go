@@ -9,14 +9,14 @@ import (
 func main() {
 	const screenWidth, screenHeight = 800, 600
 	app := application.New(screenWidth, screenHeight)
-	updateStatus := newHUD(app)
+	hud := newHUD(app)
 
 	addButtons(app) // No usefull buttons yet.
 
-	addRectangle(app, updateStatus)
-	addCircle(app, 100, 100, 50, updateStatus)
-	addCircle(app, 100, 250, 50, updateStatus)
-	addTriangle(app, updateStatus)
+	addRectangle(app, hud.shapeInfo)
+	addCircle(app, 100, 100, 50, hud)
+	addCircle(app, 100, 250, 50, hud)
+	addTriangle(app, hud.shapeInfo)
 
 	if err := application.Run(app); err != nil {
 		log.Fatalf("Run failed: %v", err)

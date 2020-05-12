@@ -8,9 +8,15 @@ import (
 	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component/drag"
 	"github.com/yarcat/playground/geom/app/component/label"
+	"github.com/yarcat/playground/geom/app/intersect"
 )
 
-func newHUD(app *application.App) func(image.Rectangle) {
+type hud struct {
+	shapeInfo func(image.Rectangle)
+	crossInfo func(intersect.I)
+}
+
+func newHUD(app *application.App) *hud {
 	var labels [3]*label.Label
 
 	const s = "Hello, world!"
@@ -31,8 +37,14 @@ func newHUD(app *application.App) func(image.Rectangle) {
 		app.AddComponent(drag.EnableFor(l))
 	}
 
-	return func(r image.Rectangle) {
-		status := fmt.Sprintf("(%d,%d) %dx%d", r.Min.X, r.Min.Y, r.Dx(), r.Dy())
-		labels[1].SetText(status)
+	return &hud{
+		shapeInfo: func(r image.Rectangle) {
+			status := fmt.Sprintf("(%d,%d) %dx%d", r.Min.X, r.Min.Y, r.Dx(), r.Dy())
+			labels[1].SetText(status)
+		},
+		crossInfo: func(i intersect.I) {
+			status := fmt.Sprintf("(%.2f,%.2f) %.6f", i.N.X, i.N.Y, i.P)
+			labels[0].SetText(status)
+		},
 	}
 }
