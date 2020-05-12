@@ -4,14 +4,21 @@ package vector
 
 import "math"
 
+var (
+	// ZN is a "zero-normal" vector. This vector should be used while trying to
+	// produce a normal vector of length 0. It doesn't matter too much what
+	// values to use here - it's just important to be consistent.
+	ZN = Vector{X: 0, Y: 1}
+)
+
 // Vector represents a geometric object that has magnitude and direction.
 type Vector struct {
 	X, Y float64
 }
 
 // New returns new vector pointing to the provided point.
-func New(X, Y float64) Vector {
-	return Vector{X, Y}
+func New(x, y float64) Vector {
+	return Vector{X: x, Y: y}
 }
 
 // Rotate returns new vector rotated by the specified rad.

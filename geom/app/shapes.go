@@ -31,17 +31,18 @@ func addRectangle(app *application.App, updateStatus func(image.Rectangle)) {
 var circles = make(map[component.Component]*intersect.C)
 
 func addCircle(app *application.App, x, y, r int, updateStatus func(image.Rectangle)) {
-	xc := intersect.C{X: float64(x), Y: float64(y), R: float64(r)}
+	xc := &intersect.C{X: float64(x), Y: float64(y), R: float64(r)}
 	var c *canvas.Canvas
 	c = canvas.New(func(img *canvas.Image) {
 		img.Clear()
+		img.Fill(color.RGBA{0xff, 0xff, 0xff, 0xa0})
 		w, h := img.Size()
 		var col color.Color = color.White
 		for otherc, otherxc := range circles {
 			if otherc == c {
 				continue
 			}
-			if _, ok := intersect.Circles(xc, *otherxc); ok {
+			if _, ok := intersect.Circles(*xc, *otherxc); ok {
 				col = color.RGBA{0xff, 0, 0, 0xff}
 			}
 		}
@@ -51,9 +52,13 @@ func addCircle(app *application.App, x, y, r int, updateStatus func(image.Rectan
 	d := drag.EnableFor(c)
 	d.AddDragListener(func() {
 		updateStatus(c.Bounds())
-
+		b := c.Bounds()
+		xc.MoveTo(
+			math.Round(float64(b.Min.X+b.Max.X)/2),
+			math.Round(float64(b.Min.Y+b.Max.Y)/2),
+		)
 	})
-	circles[c] = &xc
+	circles[c] = xc
 	app.AddComponent(d)
 }
 
