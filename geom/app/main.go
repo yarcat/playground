@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -13,7 +12,6 @@ import (
 	"github.com/yarcat/playground/geom/app/component/canvas"
 	"github.com/yarcat/playground/geom/app/component/drag"
 	"github.com/yarcat/playground/geom/app/component/features"
-	"github.com/yarcat/playground/geom/app/component/label"
 	"github.com/yarcat/playground/geom/shapes"
 	"github.com/yarcat/playground/geom/vector"
 )
@@ -21,30 +19,7 @@ import (
 func main() {
 	const screenWidth, screenHeight = 800, 600
 	app := application.New(screenWidth, screenHeight)
-
-	var labels [3]*label.Label
-	updateStatus := func(r image.Rectangle) {
-		status := fmt.Sprintf("(%d,%d) %dx%d", r.Min.X, r.Min.Y, r.Dx(), r.Dy())
-		labels[1].SetText(status)
-	}
-
-	const s = "Hello, world!"
-	for i, data := range []struct {
-		color  color.Color
-		halign label.HAlign
-	}{
-		{color.RGBA{0x80, 0x00, 0x00, 0xff}, label.HLeft},
-		{color.RGBA{0x80, 0x80, 0x00, 0xff}, label.HCenter},
-		{color.RGBA{0x00, 0x80, 0x00, 0xff}, label.HRight},
-	} {
-		l := label.New(s)
-		labels[i] = l
-		x, y := 265*i, 5
-		l.SetBounds(image.Rect(x, y, x+len(s)*20, y+20))
-		l.SetBgColor(data.color)
-		l.SetHAlign(data.halign)
-		app.AddComponent(drag.EnableFor(l))
-	}
+	updateStatus := newHUD(app)
 
 	b := button.New("Press me")
 	b.SetBounds(image.Rect(100, 300, 200, 350))
