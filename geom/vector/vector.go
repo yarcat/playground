@@ -36,3 +36,8 @@ func (v Vector) Add(a Vector) Vector {
 func (v Vector) Sub(a Vector) Vector {
 	return New(v.X-a.X, v.Y-a.Y)
 }
+
+// Scale returns new vector with X and Y scaled equally.
+func (v Vector) Scale(k float64) Vector {
+	return New(v.X*k, v.Y*k)
+}
