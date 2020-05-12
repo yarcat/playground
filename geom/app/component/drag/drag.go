@@ -13,7 +13,8 @@ type dragFeatures struct {
 // Drag makes an underlying component mouse-draggable.
 type Drag struct {
 	component.WithLifecycle
-	pressed bool
+	pressed       bool
+	dragListeners []func()
 }
 
 // EnableFor wraps a component with lifecycle and enable its dragging.
@@ -39,6 +40,14 @@ func (d *Drag) HandleAdded(parent component.Component, features *ftrs.Features) 
 			}
 			b := d.Bounds().Add(evt.D())
 			d.SetBounds(b)
+			for _, fn := range d.dragListeners {
+				fn()
+			}
 		}),
 	)
+}
+
+// AddDragListener registers a callback executed on every drag event.
+func (d *Drag) AddDragListener(fn func()) {
+	d.dragListeners = append(d.dragListeners, fn)
 }

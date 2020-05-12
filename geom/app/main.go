@@ -74,7 +74,6 @@ func main() {
 	var r, c, t *canvas.Canvas
 
 	c = canvas.New(func(img *canvas.Image) {
-		updateStatus(c.Bounds())
 		if img.Invalidated() {
 			w, h := img.Size()
 			d := w
@@ -85,20 +84,22 @@ func main() {
 		}
 	})
 	c.SetBounds(image.Rect(50, 150, 150, 250))
-	app.AddComponent(drag.EnableFor(c))
+	d := drag.EnableFor(c)
+	d.AddDragListener(func() { updateStatus(c.Bounds()) })
+	app.AddComponent(d)
 
 	r = canvas.New(func(img *canvas.Image) {
-		updateStatus(r.Bounds())
 		if img.Invalidated() {
 			w, h := img.Size()
 			shapes.DrawRectangle(img.Image, w, h, color.White)
 		}
 	})
 	r.SetBounds(image.Rect(200, 150, 300, 250))
-	app.AddComponent(drag.EnableFor(r))
+	d = drag.EnableFor(r)
+	d.AddDragListener(func() { updateStatus(r.Bounds()) })
+	app.AddComponent(d)
 
 	t = canvas.New(func(img *canvas.Image) {
-		updateStatus(t.Bounds())
 		if img.Invalidated() {
 			w, h := img.Size()
 			x0, y0 := float64(w)/2, float64(h)/2
@@ -125,7 +126,9 @@ func main() {
 		}
 	})
 	t.SetBounds(image.Rect(350, 150, 450, 250))
-	app.AddComponent(drag.EnableFor(t))
+	d = drag.EnableFor(t)
+	d.AddDragListener(func() { updateStatus(t.Bounds()) })
+	app.AddComponent(d)
 
 	if err := application.Run(app); err != nil {
 		log.Fatalf("Run failed: %v", err)
