@@ -46,6 +46,14 @@ func New(text string) *Label {
 	}
 }
 
+// SetText updates label text.
+func (l *Label) SetText(text string) {
+	if l.text != text {
+		l.text = text
+		l.image = nil
+	}
+}
+
 // HandleAdded is called right after this component is added to its parent.
 func (l *Label) HandleAdded(parent component.Component, features *ftrs.Features) {
 	features.Add(ftrs.Draw(l.draw))

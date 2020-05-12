@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -21,6 +22,12 @@ func main() {
 	const screenWidth, screenHeight = 800, 600
 	app := application.New(screenWidth, screenHeight)
 
+	var labels [3]*label.Label
+	updateStatus := func(r image.Rectangle) {
+		status := fmt.Sprintf("(%d,%d) %dx%d", r.Min.X, r.Min.Y, r.Dx(), r.Dy())
+		labels[1].SetText(status)
+	}
+
 	const s = "Hello, world!"
 	for i, data := range []struct {
 		color  color.Color
@@ -31,7 +38,8 @@ func main() {
 		{color.RGBA{0x00, 0x80, 0x00, 0xff}, label.HRight},
 	} {
 		l := label.New(s)
-		x, y := 50*i, (20+5)*i
+		labels[i] = l
+		x, y := 265*i, 5
 		l.SetBounds(image.Rect(x, y, x+len(s)*20, y+20))
 		l.SetBgColor(data.color)
 		l.SetHAlign(data.halign)
@@ -63,7 +71,10 @@ func main() {
 	}(b))
 	app.AddComponent(b)
 
-	c := canvas.New(func(img *canvas.Image) {
+	var r, c, t *canvas.Canvas
+
+	c = canvas.New(func(img *canvas.Image) {
+		updateStatus(c.Bounds())
 		if img.Invalidated() {
 			w, h := img.Size()
 			d := w
@@ -73,19 +84,21 @@ func main() {
 			shapes.DrawCircle(img.Image, w/2, h/2, d/2, color.White)
 		}
 	})
-	c.SetBounds(image.Rect(500, 500, 600, 600))
+	c.SetBounds(image.Rect(50, 150, 150, 250))
 	app.AddComponent(drag.EnableFor(c))
 
-	r := canvas.New(func(img *canvas.Image) {
+	r = canvas.New(func(img *canvas.Image) {
+		updateStatus(r.Bounds())
 		if img.Invalidated() {
 			w, h := img.Size()
 			shapes.DrawRectangle(img.Image, w, h, color.White)
 		}
 	})
-	r.SetBounds(image.Rect(500, 500, 600, 600))
+	r.SetBounds(image.Rect(200, 150, 300, 250))
 	app.AddComponent(drag.EnableFor(r))
 
-	t := canvas.New(func(img *canvas.Image) {
+	t = canvas.New(func(img *canvas.Image) {
+		updateStatus(t.Bounds())
 		if img.Invalidated() {
 			w, h := img.Size()
 			x0, y0 := float64(w)/2, float64(h)/2
@@ -111,7 +124,7 @@ func main() {
 			}
 		}
 	})
-	t.SetBounds(image.Rect(500, 500, 600, 600))
+	t.SetBounds(image.Rect(350, 150, 450, 250))
 	app.AddComponent(drag.EnableFor(t))
 
 	if err := application.Run(app); err != nil {
