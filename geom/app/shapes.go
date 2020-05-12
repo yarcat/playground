@@ -7,8 +7,10 @@ import (
 
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/yarcat/playground/geom/app/application"
+	"github.com/yarcat/playground/geom/app/component"
 	"github.com/yarcat/playground/geom/app/component/canvas"
 	"github.com/yarcat/playground/geom/app/component/drag"
+	"github.com/yarcat/playground/geom/app/intersect"
 	"github.com/yarcat/playground/geom/shapes"
 	"github.com/yarcat/playground/geom/vector"
 )
@@ -26,20 +28,32 @@ func addRectangle(app *application.App, updateStatus func(image.Rectangle)) {
 	app.AddComponent(d)
 }
 
-func addCircle(app *application.App, updateStatus func(image.Rectangle)) {
-	c := canvas.New(func(img *canvas.Image) {
-		if img.Invalidated() {
-			w, h := img.Size()
-			d := w
-			if h < d {
-				d = h
+var circles = make(map[component.Component]*intersect.C)
+
+func addCircle(app *application.App, x, y, r int, updateStatus func(image.Rectangle)) {
+	xc := intersect.C{X: float64(x), Y: float64(y), R: float64(r)}
+	var c *canvas.Canvas
+	c = canvas.New(func(img *canvas.Image) {
+		img.Clear()
+		w, h := img.Size()
+		var col color.Color = color.White
+		for otherc, otherxc := range circles {
+			if otherc == c {
+				continue
 			}
-			shapes.DrawCircle(img.Image, w/2, h/2, d/2, color.White)
+			if _, ok := intersect.Circles(xc, *otherxc); ok {
+				col = color.RGBA{0xff, 0, 0, 0xff}
+			}
 		}
+		shapes.DrawCircle(img.Image, w/2, h/2, r, col)
 	})
-	c.SetBounds(image.Rect(50, 150, 150, 250))
+	c.SetBounds(image.Rect(x-r, y-r, x+r, y+r))
 	d := drag.EnableFor(c)
-	d.AddDragListener(func() { updateStatus(c.Bounds()) })
+	d.AddDragListener(func() {
+		updateStatus(c.Bounds())
+
+	})
+	circles[c] = &xc
 	app.AddComponent(d)
 }
 

@@ -14,7 +14,8 @@ func main() {
 	addButtons(app) // No usefull buttons yet.
 
 	addRectangle(app, updateStatus)
-	addCircle(app, updateStatus)
+	addCircle(app, 100, 100, 50, updateStatus)
+	addCircle(app, 100, 250, 50, updateStatus)
 	addTriangle(app, updateStatus)
 
 	if err := application.Run(app); err != nil {
