@@ -15,34 +15,38 @@ import (
 	"github.com/yarcat/playground/geom/vector"
 )
 
-var circles []*circle
-
 type circle struct {
 	intersect.C
+	other *circle
+	xi    intersect.I
 	xInfo func(intersect.I)
+}
+
+func (c *circle) intersected(other *circle, xi intersect.I) {
+	c.other = other
+	c.xi = xi
+}
+
+func (c circle) hasIntersection() bool {
+	return c.other != nil
 }
 
 func (c *circle) draw(img *canvas.Image) {
 	img.Clear()
 	img.Fill(color.RGBA{0xff, 0xff, 0xff, 0xa0})
 	w, h := img.Size()
-	for _, other := range circles {
-		if other == c {
-			continue
-		}
-		if xi, ok := intersect.Circles(c.C, other.C); ok {
-			center := vector.New(float64(w/2), float64(h/2))
-			c.xInfo(xi)
-			// TODO(yarcat): Remove duplicates.
-			c.drawX(img.Image, center, xi)
-		}
+	if c.hasIntersection() {
+		center := vector.New(float64(w/2), float64(h/2))
+		c.xInfo(c.xi)
+		// TODO(yarcat): Remove duplicates.
+		c.drawX(img.Image, center)
 	}
 	shapes.DrawCircle(img.Image, w/2, h/2, int(c.R), color.White)
 }
 
-func (c circle) drawX(img *ebiten.Image, center vector.Vector, xi intersect.I) {
-	p1 := center.Add(xi.N.Scale(c.R))
-	p2 := p1.Sub(xi.N.Scale(xi.P))
+func (c circle) drawX(img *ebiten.Image, center vector.Vector) {
+	p1 := center.Add(c.xi.N.Scale(c.R))
+	p2 := p1.Sub(c.xi.N.Scale(c.xi.P))
 	ebitenutil.DrawLine(
 		img,
 		p1.X, p1.Y,
@@ -51,8 +55,8 @@ func (c circle) drawX(img *ebiten.Image, center vector.Vector, xi intersect.I) {
 	)
 }
 
-func addCircle(app *application.App, x, y, r int, hud *hud) {
-	xc := circle{
+func addCircle(app *application.App, x, y, r int, hud *hud, is *intersector) {
+	xc := &circle{
 		C:     intersect.C{X: float64(x), Y: float64(y), R: float64(r)},
 		xInfo: hud.crossInfo,
 	}
@@ -61,12 +65,13 @@ func addCircle(app *application.App, x, y, r int, hud *hud) {
 	d := drag.EnableFor(c)
 	d.AddDragListener(func() {
 		hud.shapeInfo(c.Bounds())
+		is.computeC(xc)
 		b := c.Bounds()
 		xc.MoveTo(
 			math.Round(float64(b.Min.X+b.Max.X)/2),
 			math.Round(float64(b.Min.Y+b.Max.Y)/2),
 		)
 	})
-	circles = append(circles, &xc)
+	is.addC(xc)
 	app.AddComponent(d)
 }
