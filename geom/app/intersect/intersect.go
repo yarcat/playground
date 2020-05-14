@@ -61,5 +61,19 @@ func Circles(a, b C) (intersection I, ok bool) {
 // Rectangles intersects two AABB rectangles and returns intersection
 // information.
 func Rectangles(a, b R) (intersection I, ok bool) {
+	dx := math.Abs(b.X - a.X)
+	w2 := (a.W + b.W) / 2
+	px := dx - w2
+	if px > 0 { // No X-axis intersection.
+		return
+	}
+
+	dy := math.Abs(b.Y - a.Y)
+	h2 := (a.H + b.H) / 2
+	py := dy - h2
+	if py > 0 { // No Y-axis intersection.
+		return
+	}
+
 	return intersection, true
 }
