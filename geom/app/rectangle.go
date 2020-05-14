@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/yarcat/playground/geom/app/application"
 	"github.com/yarcat/playground/geom/app/component/canvas"
 	"github.com/yarcat/playground/geom/app/component/drag"
@@ -35,9 +37,37 @@ func (r *rect) draw(img *canvas.Image) {
 	if r.hasIntersection() {
 		r.xInfo(r.xi)
 		shapes.DrawRectangle(img.Image, 0, 0, w, h, color.RGBA{0xff, 0, 0, 0xff})
-	} else {
-		shapes.DrawRectangle(img.Image, 0, 0, w, h, color.White)
+		r.drawX(img.Image)
 	}
+	shapes.DrawRectangle(img.Image, 0, 0, w, h, color.White)
+}
+
+func (r rect) drawX(img *ebiten.Image) {
+	var x1, y1, x2, y2 float64
+	if r.xi.N.X != 0 {
+		dy := (r.other.H+r.H)/2 - r.other.Y + r.Y
+		y1 = r.H - dy/2
+		y2 = y1
+		if r.xi.N.X > 0 {
+			x1 = r.W
+			x2 = r.W - r.xi.P
+		} else {
+			x1 = 0
+			x2 = r.xi.P
+		}
+	} else {
+		dx := (r.other.W+r.W)/2 - r.other.X + r.X
+		x1 = r.W - dx/2
+		x2 = x1
+		if r.xi.N.Y > 0 {
+			y1 = r.H
+			y2 = r.H - r.xi.P
+		} else {
+			y1 = 0
+			y2 = r.xi.P
+		}
+	}
+	ebitenutil.DrawLine(img, x1, y1, x2, y2, color.RGBA{0xff, 0, 0, 0xff})
 }
 
 func addRectangle(app *application.App, x, y, w, h int, hud *hud, is *intersector) {
