@@ -10,15 +10,16 @@ import (
 // Rectangle returns an image with a rectangle in it.
 func Rectangle(width, height int, c color.Color) *ebiten.Image {
 	img, _ := ebiten.NewImage(width, height, ebiten.FilterDefault)
-	DrawRectangle(img, width, height, c)
+	DrawRectangle(img, 0, 0, width, height, c)
 	return img
 }
 
 // DrawRectangle draws rectangle in the provided image.
-func DrawRectangle(img *ebiten.Image, width, height int, c color.Color) {
-	w, h := float64(width), float64(height)
-	ebitenutil.DrawLine(img, 5, 5, w-5, 5, c)
-	ebitenutil.DrawLine(img, 5, 5, 5, h-5, c)
-	ebitenutil.DrawLine(img, w-5, 5, w-5, h-5, c)
-	ebitenutil.DrawLine(img, 5, h-5, w-5, h-5, c)
+func DrawRectangle(img *ebiten.Image, x1, y1, x2, y2 int, c color.Color) {
+	fx1, fy1 := float64(x1), float64(y1)
+	fx2, fy2 := float64(x2), float64(y2)
+	ebitenutil.DrawLine(img, fx1, fy1, fx2, fy1, c)
+	ebitenutil.DrawLine(img, fx1, fy2-1, fx2, fy2-1, c)
+	ebitenutil.DrawLine(img, fx1+1, fy1, fx1+1, fy2, c)
+	ebitenutil.DrawLine(img, fx2, fy1, fx2, fy2, c)
 }

@@ -18,6 +18,16 @@ func (c *C) MoveTo(x, y float64) {
 	c.X, c.Y = x, y
 }
 
+// R represents an Axis-Aligned Bounding Box.
+type R struct {
+	X, Y, W, H float64
+}
+
+// MoveTo moves the rectangle center.
+func (r *R) MoveTo(x, y float64) {
+	r.X, r.Y = x, y
+}
+
 // I represents an intersection information.
 type I struct {
 	// P is a penetration value.
@@ -46,4 +56,10 @@ func Circles(a, b C) (intersection I, ok bool) {
 		intersection.N = vector.New(dx/len, dy/len)
 	}
 	return
+}
+
+// Rectangles intersects two AABB rectangles and returns intersection
+// information.
+func Rectangles(a, b R) (intersection I, ok bool) {
+	return intersection, true
 }

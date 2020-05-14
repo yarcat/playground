@@ -14,7 +14,8 @@ func main() {
 
 	addButtons(app) // No usefull buttons yet.
 
-	addRectangle(app, hud.shapeInfo)
+	addRectangle(app, 300, 100, 100, 100, hud, is)
+	addRectangle(app, 300, 250, 100, 100, hud, is)
 	addCircle(app, 100, 100, 50, hud, is)
 	addCircle(app, 100, 250, 50, hud, is)
 	addTriangle(app, hud.shapeInfo)
