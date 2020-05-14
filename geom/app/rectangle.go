@@ -28,7 +28,7 @@ func (r rect) hasIntersection() bool {
 	return r.other != nil
 }
 
-func (r rect) draw(img *canvas.Image) {
+func (r *rect) draw(img *canvas.Image) {
 	img.Clear()
 	img.Fill((color.RGBA{0xf0, 0xf0, 0xf0, 0xa0}))
 	w, h := img.Size()
