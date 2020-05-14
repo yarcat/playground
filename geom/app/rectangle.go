@@ -12,23 +12,23 @@ import (
 	"github.com/yarcat/playground/geom/shapes"
 )
 
-type aabb struct {
+type rect struct {
 	intersect.R
-	other *aabb
+	other *rect
 	xi    intersect.I
 	xInfo func(intersect.I)
 }
 
-func (r *aabb) intersected(other *aabb, xi intersect.I) {
+func (r *rect) intersected(other *rect, xi intersect.I) {
 	r.other = other
 	r.xi = xi
 }
 
-func (r aabb) hasIntersection() bool {
+func (r rect) hasIntersection() bool {
 	return r.other != nil
 }
 
-func (r aabb) draw(img *canvas.Image) {
+func (r rect) draw(img *canvas.Image) {
 	img.Clear()
 	img.Fill((color.RGBA{0xf0, 0xf0, 0xf0, 0xa0}))
 	w, h := img.Size()
@@ -40,7 +40,7 @@ func (r aabb) draw(img *canvas.Image) {
 }
 
 func addRectangle(app *application.App, x, y, w, h int, hud *hud, is *intersector) {
-	xr := &aabb{
+	xr := &rect{
 		R:     intersect.R{X: float64(x), Y: float64(y), W: float64(w), H: float64(h)},
 		xInfo: hud.crossInfo,
 	}

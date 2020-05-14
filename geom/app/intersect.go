@@ -4,7 +4,7 @@ import "github.com/yarcat/playground/geom/app/intersect"
 
 type intersector struct {
 	circles []*circle
-	aabbs   []*aabb
+	aabbs   []*rect
 }
 
 func (is *intersector) addC(c *circle) {
@@ -24,11 +24,11 @@ func (is *intersector) computeC(c *circle) {
 	}
 }
 
-func (is *intersector) addR(r *aabb) {
+func (is *intersector) addR(r *rect) {
 	is.aabbs = append(is.aabbs, r)
 }
 
-func (is *intersector) computeR(r *aabb) {
+func (is *intersector) computeR(r *rect) {
 	for _, other := range is.aabbs {
 		if r == other {
 			continue
