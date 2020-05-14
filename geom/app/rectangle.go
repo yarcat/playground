@@ -33,6 +33,7 @@ func (r *rect) draw(img *canvas.Image) {
 	img.Fill((color.RGBA{0xf0, 0xf0, 0xf0, 0xa0}))
 	w, h := img.Size()
 	if r.hasIntersection() {
+		r.xInfo(r.xi)
 		shapes.DrawRectangle(img.Image, 0, 0, w, h, color.RGBA{0xff, 0, 0, 0xff})
 	} else {
 		shapes.DrawRectangle(img.Image, 0, 0, w, h, color.White)
