@@ -40,6 +40,9 @@ func (r *rect) draw(img *canvas.Image) {
 		r.drawX(img.Image)
 	}
 	shapes.DrawRectangle(img.Image, 0, 0, w, h, color.White)
+	img.Op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+	img.Op.GeoM.Rotate(math.Pi / 100)
+	img.Op.GeoM.Translate(float64(w)/2, float64(h)/2)
 }
 
 func (r rect) drawX(img *ebiten.Image) {

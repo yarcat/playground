@@ -12,6 +12,7 @@ import (
 // Image represents a drawable image buffer.
 type Image struct {
 	*ebiten.Image
+	Op          ebiten.DrawImageOptions
 	invalidated bool
 }
 
@@ -23,8 +24,10 @@ func (img *Image) dispose() {
 }
 
 func (img *Image) setImage(i *ebiten.Image) {
-	img.Image = i
 	img.invalidated = true
+	img.Image = i
+	img.Op.GeoM.Reset()
+	img.Op.ColorM.Reset()
 }
 
 func (img Image) valid() bool {
@@ -85,5 +88,6 @@ func (c *Canvas) draw(screen *ebiten.Image) {
 	}
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.rect.Min.X), float64(c.rect.Min.Y))
+	op.GeoM.Add(c.image.Op.GeoM)
 	screen.DrawImage(c.image.Image, op)
 }
