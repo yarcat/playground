@@ -40,9 +40,11 @@ func (r *rect) draw(img *canvas.Image) {
 		r.drawX(img.Image)
 	}
 	shapes.DrawRectangle(img.Image, 0, 0, w, h, color.White)
-	img.Op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
-	img.Op.GeoM.Rotate(math.Pi / 100)
-	img.Op.GeoM.Translate(float64(w)/2, float64(h)/2)
+	if img.Invalidated() {
+		img.Op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+		img.Op.GeoM.Rotate(r.Phi)
+		img.Op.GeoM.Translate(float64(w)/2, float64(h)/2)
+	}
 }
 
 func (r rect) drawX(img *ebiten.Image) {
@@ -73,9 +75,9 @@ func (r rect) drawX(img *ebiten.Image) {
 	ebitenutil.DrawLine(img, x1, y1, x2, y2, color.RGBA{0xff, 0, 0, 0xff})
 }
 
-func addRectangle(app *application.App, x, y, w, h int, hud *hud, is *intersector) {
+func addRectangle(app *application.App, x, y, w, h int, angle float64, hud *hud, is *intersector) {
 	xr := &rect{
-		R:     intersect.R{X: float64(x), Y: float64(y), W: float64(w), H: float64(h)},
+		R:     intersect.R{X: float64(x), Y: float64(y), W: float64(w), H: float64(h), Phi: float64(angle)},
 		xInfo: hud.crossInfo,
 	}
 	r := canvas.New(xr.draw)

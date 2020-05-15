@@ -21,6 +21,7 @@ func (c *C) MoveTo(x, y float64) {
 // R represents an Axis-Aligned Bounding Box.
 type R struct {
 	X, Y, W, H float64
+	Phi        float64
 }
 
 // MoveTo moves the rectangle center.
