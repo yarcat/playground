@@ -15,12 +15,15 @@ func main() {
 
 	addButtons(app) // No usefull buttons yet.
 
+	// TODO(yarcat): Currently our bounding rect for polygons has fixed
+	// boundaries of 100. a=86.6 is a min equilateral triangle that fits.
+	v, e := newEquilateralTriangle(85)
+	addPolygon(app, 500, 100, 0, v, e, hud, is)
+	addPolygon(app, 500, 250, math.Pi/3, v, e, hud, is)
 	addRectangle(app, 300, 100, 100, 100, 0, hud, is)
 	addRectangle(app, 300, 250, 100, 100, 0, hud, is)
-	addRectangle(app, 300, 400, 100, 100, math.Pi/4, hud, is)
 	addCircle(app, 100, 100, 50, hud, is)
 	addCircle(app, 100, 250, 50, hud, is)
-	// addTriangle(app, hud.shapeInfo)
 
 	if err := application.Run(app); err != nil {
 		log.Fatalf("Run failed: %v", err)

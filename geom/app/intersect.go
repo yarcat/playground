@@ -5,6 +5,7 @@ import "github.com/yarcat/playground/geom/app/intersect"
 type intersector struct {
 	circles []*circle
 	aabbs   []*rect
+	polys   []*poly
 }
 
 func (is *intersector) addC(c *circle) {
@@ -37,6 +38,23 @@ func (is *intersector) computeR(r *rect) {
 			r.intersected(other, xi)
 		} else {
 			r.intersected(nil, intersect.I{})
+		}
+	}
+}
+
+func (is *intersector) addP(p *poly) {
+	is.polys = append(is.polys, p)
+}
+
+func (is *intersector) computeP(p *poly) {
+	for _, other := range is.polys {
+		if p == other {
+			continue
+		}
+		if xi, ok := intersect.Polygons(p.P, other.P); ok {
+			p.intersected(other, xi)
+		} else {
+			p.intersected(nil, intersect.I{})
 		}
 	}
 }

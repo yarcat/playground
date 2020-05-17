@@ -29,6 +29,21 @@ func (r *R) MoveTo(x, y float64) {
 	r.X, r.Y = x, y
 }
 
+// P represents a polygon with the center in X, Y.
+type P struct {
+	X, Y float64
+	Phi  float64
+	// V is vertices.
+	V []vector.Vector
+	// E is edges defined as connection of two vertex points.
+	E [][2]int
+}
+
+// MoveTo moves the polygon center.
+func (p *P) MoveTo(x, y float64) {
+	p.X, p.Y = x, y
+}
+
 // I represents an intersection information.
 type I struct {
 	// P is a penetration value.
@@ -94,5 +109,11 @@ func Rectangles(a, b R) (intersection I, ok bool) {
 		}
 	}
 
+	return intersection, true
+}
+
+// Polygons intersects two polygons and returns intersection info.
+func Polygons(a, b P) (intersection I, ok bool) {
+	// TODO(yarcat): Add an implementation.
 	return intersection, true
 }
