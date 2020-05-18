@@ -12,7 +12,7 @@ hopefully still something pleasant to toy around with.
 
 ## Running
 
-`go run github.com/yarcat/playground/geom/demo`
+`go run github.com/yarcat/playground/geom/app`
 
 ## Techs Used
 
