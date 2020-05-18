@@ -41,3 +41,27 @@ func (v Vector) Sub(a Vector) Vector {
 func (v Vector) Scale(k float64) Vector {
 	return New(v.X*k, v.Y*k)
 }
+
+// Dot returns a dot product of two vectors.
+func (v Vector) Dot(a Vector) float64 {
+	return v.X*a.X + v.Y*a.Y
+}
+
+// Norm returns a normalized vector in a given direction.
+func (v Vector) Norm() Vector {
+	len2 := v.Len2()
+	if len2 == 0 {
+		return ZN
+	}
+	return v.Scale(1 / math.Sqrt(len2))
+}
+
+// Len2 returns a squared length.
+func (v Vector) Len2() float64 {
+	return v.X*v.X + v.Y*v.Y
+}
+
+// Len returns vector length.
+func (v Vector) Len() float64 {
+	return math.Sqrt(v.Len2())
+}

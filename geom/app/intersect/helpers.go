@@ -1,5 +1,11 @@
 package intersect
 
+import (
+	"math"
+
+	"github.com/yarcat/playground/geom/vector"
+)
+
 const epsilon = 1e-10
 
 func isZero(f float64) bool {
@@ -7,4 +13,56 @@ func isZero(f float64) bool {
 		return f < epsilon
 	}
 	return f > epsilon
+}
+
+// support returns a support vector in a given direction. The support vector
+// is the furthest point in the given direction.
+func support(dir vector.Vector, v []vector.Vector) (sv vector.Vector) {
+	best := math.Inf(-1)
+	for _, v := range v {
+		prod := v.Dot(dir)
+		if prod > best {
+			best = prod
+			sv = v
+		}
+	}
+	return
+}
+
+// leastP returns the least penetration of two polygons defined as vertices
+// and edges.
+func leastP(v1 []vector.Vector, e1 [][2]int, v2 []vector.Vector, e2 [][2]int) float64 {
+	best := math.Inf(-1)
+	for _, e := range e1 {
+		f := v1[e[1]].Sub(v1[e[0]])
+		// TODO(yarcat): Cache normals.
+		n := vector.New(-f.Y, f.X).Norm()
+		s := support(n.Scale(-1), v2)
+		p := s.Sub(v1[e[1]]).Dot(n)
+		if p > best {
+			best = p
+		}
+	}
+	return best
+}
+
+func max(a, b float64) float64 {
+	if a >= b {
+		return a
+	}
+	return b
+}
+
+// toScene returns vertices in the "scene" coordinates. Currently polygons are
+// defined relatively to their center.
+func toScene(x, y, phi float64, v []vector.Vector) []vector.Vector {
+	if len(v) == 0 {
+		return nil
+	}
+	c := vector.New(x, y)
+	vs := make([]vector.Vector, 0, len(v))
+	for _, v := range v {
+		vs = append(vs, v.Rotate(phi).Add(c))
+	}
+	return vs
 }

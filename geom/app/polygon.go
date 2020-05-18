@@ -103,6 +103,16 @@ func newEquilateralTriangle(a float64) (v []vector.Vector, e [][2]int) {
 	p3 := p2.Rotate(math.Pi / 3)
 	o := vector.New(a/2, math.Sqrt(0.75)/3.0*a)
 	v = []vector.Vector{p1.Sub(o), p2.Sub(o), p3.Sub(o)}
-	e = [][2]int{{0, 1}, {1, 2}, {2, 0}}
+	e = [][2]int{{0, 2}, {2, 1}, {1, 0}}
+	return
+}
+
+func newSquare(a float64) (v []vector.Vector, e [][2]int) {
+	v = []vector.Vector{
+		vector.New(-a/2, a/2),
+		vector.New(a/2, a/2),
+		vector.New(a/2, -a/2),
+		vector.New(-a/2, -a/2)}
+	e = [][2]int{{0, 1}, {1, 2}, {2, 3}, {3, 0}}
 	return
 }

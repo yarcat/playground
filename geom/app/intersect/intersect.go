@@ -114,6 +114,20 @@ func Rectangles(a, b R) (intersection I, ok bool) {
 
 // Polygons intersects two polygons and returns intersection info.
 func Polygons(a, b P) (intersection I, ok bool) {
-	// TODO(yarcat): Add an implementation.
+	// TODO(yarcat): Switch to the scene coordinates. Ensure we don't commpute
+	// this every time.
+	av := toScene(a.X, a.Y, a.Phi, a.V)
+	bv := toScene(b.X, b.Y, b.Phi, b.V)
+
+	p1 := leastP(av, a.E, bv, b.E)
+	if p1 > 0 {
+		return
+	}
+	p2 := leastP(bv, b.E, av, a.E)
+	if p2 > 0 {
+		return
+	}
+	intersection.P = max(p1, p2)
+	// TODO(yarcat): Fill in the normal vector.
 	return intersection, true
 }
