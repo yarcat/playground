@@ -7,6 +7,7 @@ etc.
 Eventually it can become an impulse physics engine. Not [Box2D] of course, but
 hopefully still something pleasant to toy around with.
 
+[Golang]: https://golang.org/
 [Box2D]: https://box2d.org/
 
 ## Running
