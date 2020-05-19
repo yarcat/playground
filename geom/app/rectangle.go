@@ -36,10 +36,9 @@ func (r *rect) draw(img *canvas.Image) {
 	w, h := img.Size()
 	if r.hasIntersection() {
 		r.xInfo(r.xi)
-		shapes.DrawRectangle(img.Image, 0, 0, w, h, color.RGBA{0xff, 0, 0, 0xff})
 		r.drawX(img.Image)
 	}
-	shapes.DrawRectangle(img.Image, 0, 0, w, h, color.White)
+	shapes.DrawRectangle(img.Image, 0, 0, w-1, h-1, color.White)
 	if img.Invalidated() {
 		img.Op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
 		img.Op.GeoM.Rotate(r.Phi)
