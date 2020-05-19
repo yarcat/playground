@@ -3,7 +3,7 @@ package contrib
 import (
 	"image"
 
-	"github.com/yarcat/playground/geom/ui"
+	"github.com/yarcat/playground/geom/old/ui"
 )
 
 // Dragger is an element that could be dragged with a mouse.

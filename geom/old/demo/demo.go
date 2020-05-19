@@ -6,11 +6,11 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/yarcat/playground/geom/body"
+	"github.com/yarcat/playground/geom/old/body"
+	"github.com/yarcat/playground/geom/old/simulation"
+	"github.com/yarcat/playground/geom/old/ui"
+	"github.com/yarcat/playground/geom/old/ui/contrib"
 	"github.com/yarcat/playground/geom/shapes"
-	"github.com/yarcat/playground/geom/simulation"
-	"github.com/yarcat/playground/geom/ui"
-	"github.com/yarcat/playground/geom/ui/contrib"
 	"github.com/yarcat/playground/geom/vector"
 )
 

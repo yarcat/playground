@@ -6,9 +6,9 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/yarcat/playground/geom/body"
 	"github.com/yarcat/playground/geom/contrib/container/orderedmap"
-	"github.com/yarcat/playground/geom/ui"
+	"github.com/yarcat/playground/geom/old/body"
+	"github.com/yarcat/playground/geom/old/ui"
 )
 
 // Simulation is a container that should be executed with ebiten.RunGame. It

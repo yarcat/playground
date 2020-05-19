@@ -8,10 +8,10 @@ Eventually it can become an impulse physics engine. Not [Box2D] of course, but
 hopefully still something pleasant to toy around with.
 
 I don't remove any unsuccessful experiments here. So there are few packages
-that I don't expect to be touched e.g. `body`, `demo`, `simulation` and `ui`.
-Most of the current development is made inside of the `app` sub-package. It
+that I don't expect to be touched. I did my best to move them to `old` package.
+Most of current development is made inside of the `app` sub-package. And it
 should be your entry point in case you wanna track the progress (which isn't
-too rapid as I also have a job and my personal life).
+too rapid as I also have my personal life, a job and VR to waste time on).
 
 [Golang]: https://golang.org/
 [Box2D]: https://box2d.org/

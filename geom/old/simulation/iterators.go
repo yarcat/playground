@@ -1,8 +1,8 @@
 package simulation
 
 import (
-	"github.com/yarcat/playground/geom/body"
 	"github.com/yarcat/playground/geom/contrib/container/orderedmap"
+	"github.com/yarcat/playground/geom/old/body"
 )
 
 type bodyIterator struct {
