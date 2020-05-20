@@ -50,6 +50,10 @@ type I struct {
 	P float64
 	// N is an intersection normal vector.
 	N vector.Vector
+	// S is a support point.
+	// TODO(yarcat): I'm not sure this is revant in all situation. We probably
+	// have to think about an abstraction, where this makes sense.
+	S vector.Vector
 }
 
 // Circles intersects two circles and returns an intersection information.
@@ -119,15 +123,23 @@ func Polygons(a, b P) (intersection I, ok bool) {
 	av := toScene(a.X, a.Y, a.Phi, a.V)
 	bv := toScene(b.X, b.Y, b.Phi, b.V)
 
-	p1 := leastP(av, a.E, bv, b.E)
+	p1, n1, s1 := leastP(av, a.E, bv, b.E)
 	if p1 > 0 {
 		return
 	}
-	p2 := leastP(bv, b.E, av, a.E)
+	p2, n2, s2 := leastP(bv, b.E, av, a.E)
 	if p2 > 0 {
 		return
 	}
-	intersection.P = max(p1, p2)
-	// TODO(yarcat): Fill in the normal vector.
-	return intersection, true
+	ok = true
+	if p1 >= p2 {
+		intersection.P = p1
+		intersection.N = n1
+		intersection.S = s1
+	} else {
+		intersection.P = p2
+		intersection.N = n2.Scale(-1)
+		intersection.S = s2
+	}
+	return
 }

@@ -31,26 +31,26 @@ func support(dir vector.Vector, v []vector.Vector) (sv vector.Vector) {
 
 // leastP returns the least penetration of two polygons defined as vertices
 // and edges.
-func leastP(v1 []vector.Vector, e1 [][2]int, v2 []vector.Vector, e2 [][2]int) float64 {
-	best := math.Inf(-1)
+func leastP(
+	v1 []vector.Vector,
+	e1 [][2]int,
+	v2 []vector.Vector,
+	e2 [][2]int,
+) (pen float64, norm vector.Vector, sup vector.Vector) {
+	pen = math.Inf(-1)
 	for _, e := range e1 {
 		f := v1[e[1]].Sub(v1[e[0]])
 		// TODO(yarcat): Cache normals.
 		n := vector.New(-f.Y, f.X).Norm()
 		s := support(n.Scale(-1), v2)
 		p := s.Sub(v1[e[1]]).Dot(n)
-		if p > best {
-			best = p
+		if p > pen {
+			pen = p
+			norm = n
+			sup = s
 		}
 	}
-	return best
-}
-
-func max(a, b float64) float64 {
-	if a >= b {
-		return a
-	}
-	return b
+	return
 }
 
 // toScene returns vertices in the "scene" coordinates. Currently polygons are
