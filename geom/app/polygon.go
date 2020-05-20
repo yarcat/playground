@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -52,11 +53,18 @@ func (p *poly) draw(img *canvas.Image) {
 			p.v[e[0]].X, p.v[e[0]].Y,
 			p.v[e[1]].X, p.v[e[1]].Y,
 			c)
-
 	}
 }
 
 func (p poly) drawX(img *ebiten.Image) {
+	w, h := img.Size()
+	x1 := p.xi.S.X - p.P.X + float64(w)/2
+	y1 := p.xi.S.Y - p.P.Y + float64(h)/2
+	x2 := x1 + p.xi.N.X*p.xi.P + float64(w)/2
+	y2 := y1 + p.xi.N.Y*p.xi.P + float64(h)/2
+	// TODO(yarcat): Get rid of this debug output.
+	fmt.Println(x1, y1, x2, y2)
+	ebitenutil.DrawLine(img, x1, y1, x2, y2, color.RGBA{255, 0, 0, 255})
 }
 
 func addPolygon(
