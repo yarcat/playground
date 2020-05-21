@@ -47,14 +47,13 @@ func (is *intersector) addP(p *poly) {
 }
 
 func (is *intersector) computeP(p *poly) {
+	p.intersected(nil, intersect.I{})
 	for _, other := range is.polys {
 		if p == other {
 			continue
 		}
 		if xi, ok := intersect.Polygons(p.P, other.P); ok {
 			p.intersected(other, xi)
-		} else {
-			p.intersected(nil, intersect.I{})
 		}
 	}
 }
