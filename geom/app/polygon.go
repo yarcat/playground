@@ -60,8 +60,9 @@ func (p poly) drawX(img *ebiten.Image) {
 	w, h := img.Size()
 	x1 := p.xi.S.X - p.P.X + float64(w)/2
 	y1 := p.xi.S.Y - p.P.Y + float64(h)/2
-	x2 := x1 + p.xi.N.X*p.xi.P + float64(w)/2
-	y2 := y1 + p.xi.N.Y*p.xi.P + float64(h)/2
+	fmt.Println(p.xi.N.Len(), p.xi.P)
+	x2 := x1 - p.xi.N.X*p.xi.P
+	y2 := y1 - p.xi.N.Y*p.xi.P
 	// TODO(yarcat): Get rid of this debug output.
 	fmt.Println(x1, y1, x2, y2)
 	ebitenutil.DrawLine(img, x1, y1, x2, y2, color.RGBA{255, 0, 0, 255})
@@ -86,7 +87,7 @@ func addPolygon(
 	}
 	p := canvas.New(xp.draw)
 	// TODO(yarcat): Compute these based on the polygon vertices.
-	w, h := 100, 100
+	w, h := 200, 200
 	p.SetBounds(image.Rect(
 		int(x)-w/2, int(y)-h/2,
 		int(x)+w/2, int(y)+h/2),

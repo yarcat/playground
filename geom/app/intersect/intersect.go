@@ -137,7 +137,7 @@ func Polygons(a, b P) (intersection I, ok bool) {
 		intersection.N = n1
 		intersection.S = s1
 	} else {
-		intersection.P = p2
+		intersection.P = -p2
 		intersection.N = n2.Scale(-1)
 		intersection.S = s2
 	}
