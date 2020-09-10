@@ -19,6 +19,19 @@ func BenchmarkSliceCopyWithPreallocSmall(b *testing.B)  { benchmark(b, sliceCopy
 func BenchmarkSliceCopyWithPreallocMedium(b *testing.B) { benchmark(b, sliceCopyWithPrealloc, medium) }
 func BenchmarkSliceCopyWithPreallocLarge(b *testing.B)  { benchmark(b, sliceCopyWithPrealloc, large) }
 
+func BenchmarkSliceCopyWithTransformPreallocEmpty(b *testing.B) {
+	benchmark(b, sliceCopyWithTransformPrealloc(transform), empty)
+}
+func BenchmarkSliceCopyWithTransformPreallocSmall(b *testing.B) {
+	benchmark(b, sliceCopyWithTransformPrealloc(transform), small)
+}
+func BenchmarkSliceCopyWithTransformPreallocMedium(b *testing.B) {
+	benchmark(b, sliceCopyWithTransformPrealloc(transform), medium)
+}
+func BenchmarkSliceCopyWithTransformPreallocLarge(b *testing.B) {
+	benchmark(b, sliceCopyWithTransformPrealloc(transform), large)
+}
+
 type copyFunc func(in []int) (out []int)
 
 func benchmark(b *testing.B, fn copyFunc, in []int) {
@@ -36,6 +49,21 @@ func sliceCopyWithPrealloc(in []int) (out []int) {
 		out = append(out, v)
 	}
 	return out
+}
+
+func transform(x int) int { return x << 10 }
+
+func sliceCopyWithTransformPrealloc(fn func(int) int) copyFunc {
+	return func(in []int) (out []int) {
+		if len(in) == 0 {
+			return nil
+		}
+		out = make([]int, 0, len(in))
+		for i, v := range in {
+			out = append(out, fn(i+v))
+		}
+		return out
+	}
 }
 
 func sliceCopyWithAppend(in []int) (out []int) {
