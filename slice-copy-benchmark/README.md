@@ -1,15 +1,14 @@
 ```
-go test -bench .
-goos: linux
-goarch: amd64
-BenchmarkSliceCopyWithAppendEmpty-12            428990575                2.42 ns/op
-BenchmarkSliceCopyWithAppendSmall-12              202466              6092 ns/op
-BenchmarkSliceCopyWithAppendMedium-12               1164            876474 ns/op
-BenchmarkSliceCopyWithAppendLarge-12                 106          10908358 ns/op
-BenchmarkSliceCopyWithPreallocEmpty-12          491223627                2.28 ns/op
-BenchmarkSliceCopyWithPreallocSmall-12            416534              3217 ns/op
-BenchmarkSliceCopyWithPreallocMedium-12             4124            246446 ns/op
-BenchmarkSliceCopyWithPreallocLarge-12               499           2233837 ns/op
-PASS
-ok      _/usr/local/google/home/yarcat/src/slice-copy-benchmark 10.940s
+BenchmarkSliceCopyWithAppendEmpty-12                    424636287                2.40 ns/op
+BenchmarkSliceCopyWithAppendSmall-12                      223341              6162 ns/op
+BenchmarkSliceCopyWithAppendMedium-12                       1218            881241 ns/op
+BenchmarkSliceCopyWithAppendLarge-12                         102          11501128 ns/op
+BenchmarkSliceCopyWithPreallocEmpty-12                  480571518                2.16 ns/op
+BenchmarkSliceCopyWithPreallocSmall-12                    379932              3197 ns/op
+BenchmarkSliceCopyWithPreallocMedium-12                     4842            241606 ns/op
+BenchmarkSliceCopyWithPreallocLarge-12                       493           2300555 ns/op
+BenchmarkSliceCopyWithTransformPreallocEmpty-12         459200911                2.26 ns/op
+BenchmarkSliceCopyWithTransformPreallocSmall-12           158724              6584 ns/op
+BenchmarkSliceCopyWithTransformPreallocMedium-12            1641            701500 ns/op
+BenchmarkSliceCopyWithTransformPreallocLarge-12              208           5720325 ns/op
 ```
