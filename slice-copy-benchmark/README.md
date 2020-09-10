@@ -1,3 +1,24 @@
+With these benchmarks I'm trying to understand the most efficient way of transform/copy of slices.
+
+Slice sizes are:
+
+1. Empty is zero-length. Actually `nil` values.
+2. Small is 1'000 elements.
+3. Medium is 100'000 elements.
+4. Large is 1'000'000 elements.
+
+My benchmarks compare simple array copying using the following methods:
+
+1. Start with `nil` and then grow by using `append`.
+2. Pre-allocate `cap`, but set `len` to 0, and grow by using `append`.
+3. Pre-allocate `cap`, set `len` to `cap`, and set elements using `index` and `value` returned by `range`.
+
+Note: It could be possible to compare these against `copy`, but under real conditions we actually also
+transform the data, and it often changes its type.
+
+The same set of tests is repeated using a simple transformation function (though here for simplicity we
+don't change output type).
+
 ```
 BenchmarkSliceCopyWithAppendEmpty-12                            429394074                2.43 ns/op
 BenchmarkSliceCopyWithAppendSmall-12                              233440              5928 ns/op
