@@ -32,9 +32,9 @@ See also:
 The benchmarks were generated on my old chrome book (it is quite slow).
 
 ```
+go test -bench . -cpu=1 
 goos: linux
 goarch: amd64
-BenchmarkConcurrentFilterMap1-4             6348            180627 ns/op
-BenchmarkConcurrentFilterMap2-4             1936            573523 ns/op
-BenchmarkConcurrentFilterMap3-4             1567            669313 ns/op
-```
+BenchmarkConcurrentFilterMap1       9478            121207 ns/op
+BenchmarkConcurrentFilterMap2       2572            420701 ns/op
+BenchmarkConcurrentFilterMap3       1684            625475 ns/op```
