@@ -1,6 +1,7 @@
 This programs prints year 1980 calendar
 
 ```
+$ go run . -date 1980
         January | Mon Tue Wed Thu Fri Sat Sun
                 |       1   2   3   4   5   6 
                 |   7   8   9  10  11  12  13 
