@@ -3,6 +3,7 @@ package slicemerge
 import (
 	"math/rand"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 )
@@ -24,6 +25,7 @@ func makeRandInts(n int) []int {
 	for i := 0; i < n; i++ {
 		res[i] = rand.Int()
 	}
+	sort.Ints(res)
 	return res
 }
 
