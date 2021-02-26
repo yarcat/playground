@@ -21,7 +21,7 @@ func (l *list) qsort() {
 	if l.head == l.tail { // Single element or empty.
 		return
 	}
-	less, other := split(l.head.next, less(l.head.val))
+	less, other := split(l.head.next, func(val int) bool { return val < l.head.val })
 	*l = concat(qsorted(less), single(l.head), qsorted(other))
 }
 
@@ -134,7 +134,3 @@ func merge(a, b list) (l list) {
 func single(n *node) list { return list{head: n, tail: n} }
 func qsorted(l list) list { l.qsort(); return l }
 func msorted(l list) list { l.msort(); return l }
-
-func less(x int) func(int) bool {
-	return func(val int) bool { return val < x }
-}
