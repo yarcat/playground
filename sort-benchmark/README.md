@@ -1,7 +1,11 @@
 No attempt to write perfect sort functions. Just comparing the asymptotics of
-quick and merge sorts. Please note that quick uses element [0] as a pivot point.
-This means that we expect the random case to perform approx equally, and
-sorted/reversed cases to suck.
+quick and merge sorts for *linked lists*. Please note that quick uses element
+[0] as a pivot point. This means that we expect the random case to perform
+approx equally, and sorted/reversed cases to suck.
+
+Also benchmarks generate lots of garbage, so I'm not sure how reliable it gets
+after some time. Most probably not reliable at all. But at least we can see
+our expectations clearly.
 
 ```
 $ go test -bench .
