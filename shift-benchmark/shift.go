@@ -26,6 +26,29 @@ func shiftLeft(s []int, n int) {
 	}
 }
 
+func shiftLeft2(s []int, n int) {
+	if len(s) == 0 || len(s) == 1 {
+		return
+	}
+	if n %= len(s); n == 0 {
+		return
+	}
+	var cnt int
+	for start := 0; cnt < len(s); start++ {
+		from, to := start+n, start
+		x := s[to]
+		for from != start {
+			s[to], to = s[from], from
+			cnt++
+			if from += n; from >= len(s) {
+				from -= len(s)
+			}
+		}
+		s[to] = x
+		cnt++
+	}
+}
+
 func reverse(s []int) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]

@@ -5,23 +5,19 @@ import (
 	"testing"
 )
 
-func TestShiftLeft(t *testing.T) {
-	testShiftLeft(t, shiftLeft)
-}
+func TestShiftLeft2(t *testing.T)   { testShiftLeft(t, shiftLeft2) }
+func TestShiftLeft(t *testing.T)    { testShiftLeft(t, shiftLeft) }
+func TestShiftLeftRev(t *testing.T) { testShiftLeft(t, shiftLeftRev) }
 
-func TestShiftLeftRev(t *testing.T) {
-	testShiftLeft(t, shiftLeftRev)
-}
-
-func TestBothShifts(t *testing.T) {
-	for i := 0; i < 500; i++ {
-		in1, in2 := s(1, i+1), s(1, i+1)
-		for j := 0; j < i; j++ {
+func TestAllShifts(t *testing.T) {
+	for i := 1; i <= 50; i++ {
+		in1, in2, in3 := s(1, i), s(1, i), s(1, i)
+		for j := 0; j <= i; j++ {
 			shiftLeft(in1, j)
 			shiftLeftRev(in2, j)
-			if !reflect.DeepEqual(in1, in2) {
-				t.Errorf("i = %v, j = %v", i, j)
-				return
+			shiftLeft2(in3, j)
+			if !reflect.DeepEqual(in1, in2) || !reflect.DeepEqual(in1, in3) {
+				t.Fatalf("i = %v, j = %v", i, j)
 			}
 		}
 	}
@@ -90,5 +86,7 @@ var (
 
 func BenchmarkShiftSmall(b *testing.B)    { benchmarkShift(b, shiftLeft, small, len(small)/2) }
 func BenchmarkShiftLarge(b *testing.B)    { benchmarkShift(b, shiftLeft, large, len(large)/2) }
-func BenchmarkShiftRevSmall(b *testing.B) { benchmarkShift(b, shiftLeft, small, len(small)/2) }
-func BenchmarkShiftRevLarge(b *testing.B) { benchmarkShift(b, shiftLeft, large, len(large)/2) }
+func BenchmarkShift2Small(b *testing.B)   { benchmarkShift(b, shiftLeft2, small, len(small)/2) }
+func BenchmarkShift2Large(b *testing.B)   { benchmarkShift(b, shiftLeft2, large, len(large)/2) }
+func BenchmarkShiftRevSmall(b *testing.B) { benchmarkShift(b, shiftLeftRev, small, len(small)/2) }
+func BenchmarkShiftRevLarge(b *testing.B) { benchmarkShift(b, shiftLeftRev, large, len(large)/2) }
