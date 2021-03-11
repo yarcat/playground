@@ -30,7 +30,8 @@ func (l *SkipList) Init(levels int, less LessFn) *SkipList {
 }
 
 func (l *SkipList) Insert(value interface{}) (hops int) {
-	prev := make([]**skipListNode, l.Levels())
+	// prev := make([]**skipListNode, l.Levels())
+	 prev := make([]**skipListNode, 100)
 	for next, level := l.next, l.Levels()-1; level >= 0; level-- {
 		for next[level] != nil && l.less(next[level].value, value) {
 			next = next[level].next
