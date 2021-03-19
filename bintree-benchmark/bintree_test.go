@@ -7,29 +7,35 @@ import (
 	"time"
 )
 
-func BenchmarkIterativeInsert(b *testing.B)          { benchmarkInsert(b, iterativeInsert) }
-func BenchmarkIterativeInsertParentPtr(b *testing.B) { benchmarkInsert(b, iterativeInsertParentPtr) }
+func BenchmarkIntTreeIterativeInsert(b *testing.B) { benchmarkIntTreeInsert(b, iterativeInsert) }
+func BenchmarkIntTreeIterativeInsertParentPtr(b *testing.B) {
+	benchmarkIntTreeInsert(b, iterativeInsertParentPtr)
+}
 
-func BenchmarkRecursiveInsert(b *testing.B)          { benchmarkInsert(b, recursiveInsert) }
-func BenchmarkRecursiveInsertParentPtr(b *testing.B) { benchmarkInsert(b, recursiveInsertParentPtr) }
+func BenchmarkIntTreeRecursiveInsert(b *testing.B) { benchmarkIntTreeInsert(b, recursiveInsert) }
+func BenchmarkIntTreeRecursiveInsertParentPtr(b *testing.B) {
+	benchmarkIntTreeInsert(b, recursiveInsertParentPtr)
+}
 
-func iterativeInsert(t *Tree, val int) {
+func BenchmarkTreeIterativeInsertParentPtr(b *testing.B) { benchmarkTreeInsert(b, (*Tree).Insert) }
+
+func iterativeInsert(t *IntTree, val int) {
 	if t.root == nil {
-		t.root = &node{val: val}
+		t.root = &intNode{val: val}
 		return
 	}
 	current := t.root
 	for {
 		if val < current.val {
 			if current.l == nil {
-				current.l = &node{val: val}
+				current.l = &intNode{val: val}
 				return
 			} else {
 				current = current.l
 			}
 		} else {
 			if current.r == nil {
-				current.r = &node{val: val}
+				current.r = &intNode{val: val}
 				return
 			} else {
 				current = current.r
@@ -38,7 +44,7 @@ func iterativeInsert(t *Tree, val int) {
 	}
 }
 
-func iterativeInsertParentPtr(t *Tree, val int) {
+func iterativeInsertParentPtr(t *IntTree, val int) {
 	p := &t.root
 	for *p != nil {
 		if val < (*p).val {
@@ -47,36 +53,36 @@ func iterativeInsertParentPtr(t *Tree, val int) {
 			p = &(*p).r
 		}
 	}
-	*p = &node{val: val}
+	*p = &intNode{val: val}
 }
 
-func recursiveNodeInsert(n *node, val int) {
+func recursiveNodeInsert(n *intNode, val int) {
 	if val < n.val {
 		if n.l == nil {
-			n.l = &node{val: val}
+			n.l = &intNode{val: val}
 		} else {
 			recursiveNodeInsert(n.l, val)
 		}
 	} else {
 		if n.r == nil {
-			n.r = &node{val: val}
+			n.r = &intNode{val: val}
 		} else {
 			recursiveNodeInsert(n.r, val)
 		}
 	}
 }
 
-func recursiveInsert(t *Tree, val int) {
+func recursiveInsert(t *IntTree, val int) {
 	if t.root == nil {
-		t.root = &node{val: val}
+		t.root = &intNode{val: val}
 	} else {
 		recursiveNodeInsert(t.root, val)
 	}
 }
 
-func recursiveNodeInsertParentPtr(p **node, val int) {
+func recursiveNodeInsertParentPtr(p **intNode, val int) {
 	if *p == nil {
-		*p = &node{val: val}
+		*p = &intNode{val: val}
 	} else if val < (*p).val {
 		recursiveNodeInsertParentPtr(&(*p).l, val)
 	} else {
@@ -84,7 +90,7 @@ func recursiveNodeInsertParentPtr(p **node, val int) {
 	}
 }
 
-func recursiveInsertParentPtr(t *Tree, val int) {
+func recursiveInsertParentPtr(t *IntTree, val int) {
 	recursiveNodeInsertParentPtr(&t.root, val)
 }
 
@@ -105,7 +111,25 @@ func genData(n int) (out []int) {
 	return
 }
 
-func benchmarkInsert(b *testing.B, insert func(*Tree, int)) {
+func benchmarkIntTreeInsert(b *testing.B, insert func(*IntTree, int)) {
+	benchmarkInsert(b, func(data []int) {
+		var t IntTree
+		for _, x := range data {
+			insert(&t, x)
+		}
+	})
+}
+
+func benchmarkTreeInsert(b *testing.B, insert func(*Tree, interface{})) {
+	benchmarkInsert(b, func(data []int) {
+		t := NewTree(func(a, b interface{}) bool { return a.(int) < b.(int) })
+		for _, x := range data {
+			insert(&t, x)
+		}
+	})
+}
+
+func benchmarkInsert(b *testing.B, test func([]int)) {
 	for _, data := range [][]int{
 		data100,
 		data1k,
@@ -114,10 +138,7 @@ func benchmarkInsert(b *testing.B, insert func(*Tree, int)) {
 	} {
 		b.Run(fmt.Sprint(len(data)), func(b *testing.B) {
 			for n := 0; n < b.N; n++ {
-				var t Tree
-				for _, x := range data {
-					insert(&t, x)
-				}
+				test(data)
 			}
 		})
 	}

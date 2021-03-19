@@ -3,6 +3,46 @@ Various binary tree comparisons.
 Again, we aren't trying to create something super efficient, but rather trying
 to understand differencies between recursive and non-recursive operations.
 
+## 2021/03/19 results
+
+Another day, another numbers (-;
+
+This time I've included a benchmark for a "generic" tree implementation (the one
+that stores values as `interface{}`, and uses a `less` function to compare
+elements). It is expected that this implementation's gonna be slower, and it is
+slower (at least in my benchmarks).
+
+```
+$ go test -bench .
+goos: linux
+goarch: amd64
+pkg: example.com
+BenchmarkIntTreeIterativeInsert/100-8                     167382              6279 ns/op
+BenchmarkIntTreeIterativeInsert/1000-8                     14323            108405 ns/op
+BenchmarkIntTreeIterativeInsert/10000-8                      847           1348536 ns/op
+BenchmarkIntTreeIterativeInsert/100000-8                      33          33769556 ns/op
+BenchmarkIntTreeIterativeInsertParentPtr/100-8            202290              6053 ns/op
+BenchmarkIntTreeIterativeInsertParentPtr/1000-8            10000            105248 ns/op
+BenchmarkIntTreeIterativeInsertParentPtr/10000-8             906           1423558 ns/op
+BenchmarkIntTreeIterativeInsertParentPtr/100000-8             36          32489886 ns/op
+BenchmarkIntTreeRecursiveInsert/100-8                     219153              6764 ns/op
+BenchmarkIntTreeRecursiveInsert/1000-8                     10094            129623 ns/op
+BenchmarkIntTreeRecursiveInsert/10000-8                      508           2084201 ns/op
+BenchmarkIntTreeRecursiveInsert/100000-8                      26          45146209 ns/op
+BenchmarkIntTreeRecursiveInsertParentPtr/100-8            173766              6349 ns/op
+BenchmarkIntTreeRecursiveInsertParentPtr/1000-8             9370            130910 ns/op
+BenchmarkIntTreeRecursiveInsertParentPtr/10000-8             452           2653407 ns/op
+BenchmarkIntTreeRecursiveInsertParentPtr/100000-8             24          41995683 ns/op
+BenchmarkTreeIterativeInsertParentPtr/100-8               129399              9442 ns/op
+BenchmarkTreeIterativeInsertParentPtr/1000-8                5833            177970 ns/op
+BenchmarkTreeIterativeInsertParentPtr/10000-8                391           3334678 ns/op
+BenchmarkTreeIterativeInsertParentPtr/100000-8                19          59854362 ns/op
+PASS
+ok      example.com     35.621s
+```
+
+## 2021/03/18 results
+
 ```
  go test -bench . -benchmem
 goos: linux
