@@ -2,4 +2,4 @@ module example.com
 
 go 1.16
 
-require github.com/mattn/go-sqlite3 v1.14.7 // indirect
+require github.com/mattn/go-sqlite3 v1.14.7
