@@ -21,10 +21,10 @@ var DefaultNumericExpression = NumericExpression{
 	IsDigit:    unicode.IsDigit,
 	IsOperator: func(r rune) bool { return strings.ContainsRune("+-*/", r) },
 	IsSpace:    unicode.IsSpace,
-}.Lex
+}.Scan
 
-// Lex parses and emits numbers, operators or parentheses.
-func (ne NumericExpression) Lex(s *tokenizer.Scanner) tokenizer.StateFn {
+// Scan parses and emits numbers, operators or parentheses.
+func (ne NumericExpression) Scan(s *tokenizer.Scanner) tokenizer.StateFn {
 	switch r, eof := s.Next(); {
 	case eof:
 		s.Emit(tokenizer.TokenEOF)
@@ -43,6 +43,6 @@ func (ne NumericExpression) Lex(s *tokenizer.Scanner) tokenizer.StateFn {
 	default:
 		return s.Errorf("unexpected %q", r)
 	}
-	return ne.Lex
+	return ne.Scan
 
 }
