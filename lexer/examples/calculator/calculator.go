@@ -10,19 +10,20 @@ import (
 
 func main() {
 	for _, expr := range []string{
+		"-10",
 		"1 + 2*3",
 		"2*3 + 4",
 		"(2+2)*2",
+		"-2+2*-2",
 		"(2+2*2",
 		"2+2)*2",
-		"-2+2)*2",
 		"2*10-",
 	} {
 		x, err := eval(expr)
 		if err == nil {
-			fmt.Printf("%20s = %d\n", expr, x)
+			fmt.Printf("   OK: %13s = %d\n", expr, x)
 		} else {
-			fmt.Printf("ERROR: %15s = %v\n", expr, err)
+			fmt.Printf("ERROR: %13s   %v\n", expr, err)
 		}
 	}
 }
@@ -104,7 +105,24 @@ func isMul(tok token) bool {
 }
 
 func mul(nextToken tokenFn, left token) (int, token, error) {
-	return operator(nextToken, left, fac, isMul)
+	return operator(nextToken, left, una, isMul)
+}
+
+func isUnary(tok token) bool {
+	return tok.Type == contrib.TokenContribOperator &&
+		(tok.Value == "+" || tok.Value == "-")
+}
+
+func una(nextToken tokenFn, tok token) (int, token, error) {
+	if !isUnary(tok) {
+		return fac(nextToken, tok)
+	}
+	op := tok.Value
+	x, tok, err := fac(nextToken, nextToken())
+	if op == "-" {
+		x = -x
+	}
+	return x, tok, err
 }
 
 func fac(nextToken tokenFn, tok token) (int, token, error) {
