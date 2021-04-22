@@ -10,6 +10,18 @@ import (
 
 var errUnexpectedTok = errors.New("unexpected token")
 
+var operatorActions = map[string]func(int, int) int{
+	"+": func(a, b int) int { return a + b },
+	"-": func(a, b int) int { return a - b },
+	"*": func(a, b int) int { return a * b },
+	"/": func(a, b int) int { return a / b },
+}
+
+type (
+	actionFn  func(*scanner) (int, error)
+	opMatchFn func(tokenizer.Token) bool
+)
+
 func unexpTok(got tokenizer.Token, want string) error {
 	return fmt.Errorf("%w: got = %v, want = %s", errUnexpectedTok, got, want)
 }
@@ -49,8 +61,7 @@ func unary(s *scanner) (int, error) {
 }
 
 func factor(s *scanner) (x int, err error) {
-	tok := s.MustToken()
-	switch tok.Type {
+	switch tok := s.MustToken(); tok.Type {
 	case contrib.TokenContribOpenParen:
 		if x, err = expr(s); err != nil {
 			return 0, err
@@ -62,21 +73,10 @@ func factor(s *scanner) (x int, err error) {
 	case contrib.TokenContribNumber:
 		fmt.Sscan(tok.Value, &x)
 		return x, nil
+	default:
+		return 0, unexpTok(tok, "NUMBER or OPEN_PAREN")
 	}
-	return 0, unexpTok(tok, "NUMBER or OPEN_PAREN")
 }
-
-var operatorActions = map[string]func(int, int) int{
-	"+": func(a, b int) int { return a + b },
-	"-": func(a, b int) int { return a - b },
-	"*": func(a, b int) int { return a * b },
-	"/": func(a, b int) int { return a / b },
-}
-
-type (
-	actionFn  func(*scanner) (int, error)
-	opMatchFn func(tokenizer.Token) bool
-)
 
 func operator(s *scanner, action actionFn, opMatch opMatchFn) (x int, err error) {
 	if x, err = action(s); err != nil {
@@ -89,7 +89,8 @@ func operator(s *scanner, action actionFn, opMatch opMatchFn) (x int, err error)
 		}
 		x = operatorActions[tok.Value](x, y)
 	}
-	return backout(s, x)
+	s.Backout()
+	return x, nil
 }
 
 func isSum(tok tokenizer.Token) bool {
@@ -105,9 +106,4 @@ func isMul(tok tokenizer.Token) bool {
 func isUnaryOp(tok tokenizer.Token) bool {
 	return tok.Type == contrib.TokenContribOperator &&
 		(tok.Value == "+" || tok.Value == "-")
-}
-
-func backout(s *scanner, x int) (int, error) {
-	s.Backout()
-	return x, nil
 }
