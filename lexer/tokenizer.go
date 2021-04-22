@@ -3,11 +3,11 @@ package tokenizer
 type (
 	// StateFn is a token parsing state function, which returns next state.
 	// States are called in a loop until a token is emitted using the scanner.
-	StateFn func(*Scanner) StateFn
+	StateFn func(*Lexer) StateFn
 
 	// Tokenizer produces tokens.
 	Tokenizer struct {
-		s      *Scanner
+		s      *Lexer
 		state  StateFn
 		tokens chan Token
 	}

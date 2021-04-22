@@ -24,7 +24,7 @@ var DefaultNumericExpression = NumericExpression{
 }.Scan
 
 // Scan parses and emits numbers, operators or parentheses.
-func (ne NumericExpression) Scan(s *tokenizer.Scanner) tokenizer.StateFn {
+func (ne NumericExpression) Scan(s *tokenizer.Lexer) tokenizer.StateFn {
 	switch r, eof := s.Next(); {
 	case eof:
 		s.Emit(tokenizer.TokenEOF)
