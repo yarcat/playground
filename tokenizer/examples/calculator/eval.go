@@ -37,15 +37,13 @@ func eval(s *scanner) (int, error) {
 	return x, nil
 }
 
+func isSum(tok tokenizer.Token) bool     { return expectedOp(tok, "+", "-") }
+func isMul(tok tokenizer.Token) bool     { return expectedOp(tok, "*", "/") }
+func isUnaryOp(tok tokenizer.Token) bool { return expectedOp(tok, "+", "-") }
+
 func expr(s *scanner) (int, error) { return sum(s) }
-
-func sum(s *scanner) (int, error) {
-	return operator(s, mul, isSum)
-}
-
-func mul(s *scanner) (int, error) {
-	return operator(s, unary, isMul)
-}
+func sum(s *scanner) (int, error)  { return operator(s, mul, isSum) }
+func mul(s *scanner) (int, error)  { return operator(s, unary, isMul) }
 
 func unary(s *scanner) (int, error) {
 	tok := s.MustToken()
@@ -93,17 +91,14 @@ func operator(s *scanner, action actionFn, opMatch opMatchFn) (x int, err error)
 	return x, nil
 }
 
-func isSum(tok tokenizer.Token) bool {
-	return tok.Type == contrib.TokenContribOperator &&
-		(tok.Value == "+" || tok.Value == "-")
-}
-
-func isMul(tok tokenizer.Token) bool {
-	return tok.Type == contrib.TokenContribOperator &&
-		(tok.Value == "*" || tok.Value == "/")
-}
-
-func isUnaryOp(tok tokenizer.Token) bool {
-	return tok.Type == contrib.TokenContribOperator &&
-		(tok.Value == "+" || tok.Value == "-")
+func expectedOp(tok tokenizer.Token, set ...string) bool {
+	if tok.Type != contrib.TokenContribOperator {
+		return false
+	}
+	for _, s := range set {
+		if tok.Value == s {
+			return true
+		}
+	}
+	return false
 }
