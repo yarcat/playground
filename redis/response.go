@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 )
 
 type Response struct {
@@ -16,10 +15,19 @@ func (r Response) Error() error {
 	if err != nil {
 		return err
 	}
-	if b == '-' {
-		return r.error()
+	if b != '-' {
+		r.r.UnreadByte()
+		return nil
 	}
-	return r.r.UnreadByte()
+	// It's ok to create a scanner here, since error cases
+	buf, err := r.r.ReadSlice('\n')
+	if err != nil {
+		return fmt.Errorf("%v: %v", ErrInternal, err)
+	}
+	if l := len(buf); l > 0 && buf[l-1] == '\n' {
+		buf = buf[:l-1]
+	}
+	return fmt.Errorf("%w: %s", ErrResponse, buf)
 }
 
 func (r Response) Int() (n int, err error) {
@@ -67,19 +75,19 @@ func (r Response) BytesBulk(buf []byte) (n int, err error) {
 		return
 	}
 	if d := n - len(buf); d > 0 {
-		_, err = r.r.Discard(d)
+		if _, err = r.r.Discard(d); err != nil {
+			return
+		}
 	}
+	_, err = r.r.Discard(2) // Skip EOL.
 	return
 }
 
-func (r Response) Consume() error { return consumeResponse(r.r) }
-
-func (r Response) error() error {
-	s := bufio.NewScanner(r.r)
-	if !s.Scan() {
-		return fmt.Errorf("%v: %v", ErrInternal, s.Err())
+func (r Response) ErrorOrConsume() error {
+	if err := r.Error(); err != nil {
+		return err
 	}
-	return fmt.Errorf("%w: %s", ErrResponse, s.Bytes())
+	return consumeResponse(r.r)
 }
 
 func consumeResponse(r *bufio.Reader) error {
@@ -101,8 +109,7 @@ func consumeResponse(r *bufio.Reader) error {
 }
 
 func consumeSimpleString(r *bufio.Reader) error {
-	b, err := r.ReadSlice('\n')
-	log.Printf("consumed %q", b)
+	_, err := r.ReadSlice('\n')
 	return err
 }
 

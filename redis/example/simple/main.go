@@ -20,19 +20,16 @@ func main() {
 	defer conn.Close()
 
 	c := redis.NewClient(logging{conn})
-	run(c)
+	run(c, make([]byte, 100) /*buf*/, true /*withResultLogging*/)
 }
 
-func run(c redis.Client) {
+func run(c redis.Client, buf []byte, withResultLogging bool) {
 	resp, err := c.SetString("mykey", "myvalue\x00")
 	if err == nil {
-		err = resp.Error()
+		err = resp.ErrorOrConsume()
 	}
 	if err != nil {
 		log.Fatalf("set failed: %v", err)
-	}
-	if err = resp.Consume(); err != nil {
-		log.Fatalf("consume failed: %v", err)
 	}
 
 	resp, err = c.Exists("mykey", "kk")
@@ -46,7 +43,9 @@ func run(c redis.Client) {
 	if n, err = resp.Int(); err != nil {
 		log.Fatalf("int failed: %v", err)
 	}
-	log.Printf("exists = %v", n)
+	if withResultLogging {
+		log.Printf("exists = %v", n)
+	}
 
 	resp, err = c.Get("mykey")
 	if err == nil {
@@ -55,11 +54,12 @@ func run(c redis.Client) {
 	if err != nil {
 		log.Fatalf("get failed: %v", err)
 	}
-	b := make([]byte, 100)
-	if n, err = resp.BytesBulk(b); err != nil {
+	if n, err = resp.BytesBulk(buf); err != nil {
 		log.Fatalf("get failed: %v", err)
 	}
-	log.Printf("get = %q", b[:n])
+	if withResultLogging {
+		log.Printf("get = %q", buf[:n])
+	}
 }
 
 type logging struct{ io.ReadWriter }
