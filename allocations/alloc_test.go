@@ -82,6 +82,12 @@ func String(s string) ExecArgFunc {
 	return func(w *bufio.Writer) error { return writeString(w, s) }
 }
 
+type StringWriter struct {
+	str *string
+}
+
+func (sw StringWriter) WriteArg(w *bufio.Writer) error { return writeString(w, *sw.str) }
+
 func writeBytes(w *bufio.Writer, b []byte) error {
 	_, err := w.Write(b)
 	return err
@@ -90,6 +96,12 @@ func writeBytes(w *bufio.Writer, b []byte) error {
 func Bytes(b []byte) ExecArgFunc {
 	return func(w *bufio.Writer) error { return writeBytes(w, b) }
 }
+
+type BytesWriter struct {
+	bytes *[]byte
+}
+
+func (bw BytesWriter) WriteArg(w *bufio.Writer) error { return writeBytes(w, *bw.bytes) }
 
 func (c client) Exec(cmd string, exec ...ExecArgFunc) error {
 	_, err := c.w.WriteString(cmd)
@@ -128,6 +140,50 @@ func BenchmarkExec(b *testing.B) {
 		}
 	})
 
+	b.Run("Functors", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			c.Exec("set",
+				StringWriter{&key}.WriteArg,
+				BytesWriter{&value}.WriteArg,
+			)
+		}
+	})
+}
+
+type ArgWriter interface {
+	WriteArg(b *bufio.Writer) error
+}
+
+func (c client) ExecInterface(cmd string, args ...ArgWriter) error {
+	_, err := c.w.WriteString(cmd)
+	if err != nil {
+		return err
+	}
+	for _, arg := range args {
+		if err = arg.WriteArg(c.w); err != nil {
+			return err
+		}
+	}
+	_, err = c.w.WriteString("\r\n")
+	if err == nil {
+		err = c.w.Flush()
+	}
+	return err
+}
+
+func BenchmarkExecI(b *testing.B) {
+	c := newClient(fakeStream{})
+	value := []byte("value")
+	key := "key"
+
+	b.Run("ExecI", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			c.ExecInterface("set",
+				StringWriter{&key},
+				BytesWriter{&value},
+			)
+		}
+	})
 }
 
 func (c client) Exec2(cmd string, args func(*sender)) error {
