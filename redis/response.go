@@ -56,28 +56,7 @@ func (r Response) BytesSimple() (buf []byte, err error) {
 	return
 }
 
-func (r Response) int() (n int, err error) {
-	sign := 1
-	if b, err := r.r.ReadByte(); err != nil {
-		return 0, err
-	} else if b == '-' {
-		sign = -1
-	} else {
-		r.r.UnreadByte()
-	}
-	for {
-		b, err := r.r.ReadByte()
-		if err != nil {
-			return 0, err
-		}
-		if b == '\r' {
-			_, err = r.r.Discard(1) // Skip newline.
-			return sign * n, err
-		}
-		n *= 10
-		n += int(b - '0')
-	}
-}
+func (r Response) int() (n int, err error) { return readInt(r.r) }
 
 func (r Response) BytesBulk(buf []byte) (n int, err error) {
 	b, err := r.r.ReadByte()
@@ -111,6 +90,29 @@ func (r Response) ErrorOrConsume() error {
 		return err
 	}
 	return consumeResponse(r.r)
+}
+
+func readInt(r *bufio.Reader) (n int, err error) {
+	sign := 1
+	if b, err := r.ReadByte(); err != nil {
+		return 0, err
+	} else if b == '-' {
+		sign = -1
+	} else {
+		r.UnreadByte()
+	}
+	for {
+		b, err := r.ReadByte()
+		if err != nil {
+			return 0, err
+		}
+		if b == '\r' {
+			_, err = r.Discard(1) // Skip newline.
+			return sign * n, err
+		}
+		n *= 10
+		n += int(b - '0')
+	}
 }
 
 func consumeResponse(r *bufio.Reader) error {
@@ -151,9 +153,19 @@ func consumeBulkString(r *bufio.Reader) error {
 }
 
 func consumeArray(r *bufio.Reader) error {
+	n, err := readInt(r)
+	if err != nil {
+		return err
+	}
+	for ; n > 0; n-- {
+		if err = consumeResponse(r); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func consumeInt(r *bufio.Reader) error {
-	return nil
+	_, err := readInt(r)
+	return err
 }
