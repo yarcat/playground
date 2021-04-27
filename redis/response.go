@@ -38,8 +38,7 @@ func (r Response) Int() (n int, err error) {
 	if b != ':' {
 		return 0, fmt.Errorf("%w: got=%q, want=':'", ErrFirstByte, b)
 	}
-	_, err = fmt.Fscanln(r.r, &n)
-	return
+	return r.int()
 }
 
 func (r Response) BytesSimple() (buf []byte, err error) {
@@ -57,30 +56,47 @@ func (r Response) BytesSimple() (buf []byte, err error) {
 	return
 }
 
-func (r Response) BytesBulk(buf []byte) (n int, err error) {
+func (r Response) int() (n int, err error) {
+	for {
+		b, err := r.r.ReadByte()
+		if err != nil {
+			return 0, err
+		}
+		if b == '\r' {
+			_, err = r.r.Discard(1) // Skip newline.
+			return n, err
+		}
+		n *= 10
+		n += int(b - '0')
+	}
+}
+
+func (r Response) BytesBulk(buf []byte) (int, error) {
 	b, err := r.r.ReadByte()
 	if err != nil {
-		return
+		return 0, err
 	}
 	if b != '$' {
 		return 0, fmt.Errorf("%w: got=%q, want='$'", ErrFirstByte, b)
 	}
-	if _, err = fmt.Fscanln(r.r, &n); err != nil {
-		return
+	n, err := r.int()
+	if err != nil {
+		return 0, err
 	}
 	if len(buf) > n {
 		buf = buf[:n]
 	}
 	if _, err = io.ReadFull(r.r, buf); err != nil {
-		return
+		return 0, err
 	}
 	if d := n - len(buf); d > 0 {
+		n = len(buf)
 		if _, err = r.r.Discard(d); err != nil {
-			return
+			return n, err
 		}
 	}
 	_, err = r.r.Discard(2) // Skip EOL.
-	return
+	return n, err
 }
 
 func (r Response) ErrorOrConsume() error {
