@@ -57,6 +57,14 @@ func (r Response) BytesSimple() (buf []byte, err error) {
 }
 
 func (r Response) int() (n int, err error) {
+	sign := 1
+	if b, err := r.r.ReadByte(); err != nil {
+		return 0, err
+	} else if b == '-' {
+		sign = -1
+	} else {
+		r.r.UnreadByte()
+	}
 	for {
 		b, err := r.r.ReadByte()
 		if err != nil {
@@ -64,14 +72,14 @@ func (r Response) int() (n int, err error) {
 		}
 		if b == '\r' {
 			_, err = r.r.Discard(1) // Skip newline.
-			return n, err
+			return sign * n, err
 		}
 		n *= 10
 		n += int(b - '0')
 	}
 }
 
-func (r Response) BytesBulk(buf []byte) (int, error) {
+func (r Response) BytesBulk(buf []byte) (n int, err error) {
 	b, err := r.r.ReadByte()
 	if err != nil {
 		return 0, err
@@ -79,9 +87,8 @@ func (r Response) BytesBulk(buf []byte) (int, error) {
 	if b != '$' {
 		return 0, fmt.Errorf("%w: got=%q, want='$'", ErrFirstByte, b)
 	}
-	n, err := r.int()
-	if err != nil {
-		return 0, err
+	if n, err = r.int(); n < 0 || err != nil {
+		return
 	}
 	if len(buf) > n {
 		buf = buf[:n]

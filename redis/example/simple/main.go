@@ -32,7 +32,7 @@ func run(c redis.Client, buf []byte, withResultLogging bool) {
 		log.Fatalf("set failed: %v", err)
 	}
 
-	resp, err = c.Exists("mykey", "kk")
+	resp, err = c.Exists("mykey", "kk", "mykey2")
 	if err == nil {
 		err = resp.Error()
 	}
@@ -59,6 +59,24 @@ func run(c redis.Client, buf []byte, withResultLogging bool) {
 	}
 	if withResultLogging {
 		log.Printf("get = %q", buf[:n])
+	}
+
+	resp, err = c.Get("nosuchkey")
+	if err == nil {
+		err = resp.Error()
+	}
+	if err != nil {
+		log.Fatalf("get failed: %v", err)
+	}
+	if n, err = resp.BytesBulk(buf); err != nil {
+		log.Fatalf("get failed: %v", err)
+	}
+	if withResultLogging {
+		if n >= 0 {
+			log.Printf("get = %q", buf[:n])
+		} else {
+			log.Println("get = nil")
+		}
 	}
 }
 
