@@ -73,18 +73,22 @@ func BenchmarkSet(b *testing.B) {
 
 type ExecArgFunc func(*bufio.Writer) error
 
+func writeString(w *bufio.Writer, s string) error {
+	_, err := w.WriteString(s)
+	return err
+}
+
 func String(s string) ExecArgFunc {
-	return func(w *bufio.Writer) error {
-		_, err := w.WriteString(s)
-		return err
-	}
+	return func(w *bufio.Writer) error { return writeString(w, s) }
+}
+
+func writeBytes(w *bufio.Writer, b []byte) error {
+	_, err := w.Write(b)
+	return err
 }
 
 func Bytes(b []byte) ExecArgFunc {
-	return func(w *bufio.Writer) error {
-		_, err := w.Write(b)
-		return err
-	}
+	return func(w *bufio.Writer) error { return writeBytes(w, b) }
 }
 
 func (c client) Exec(cmd string, exec ...ExecArgFunc) error {
@@ -107,12 +111,23 @@ func (c client) Exec(cmd string, exec ...ExecArgFunc) error {
 func BenchmarkExec(b *testing.B) {
 	c := newClient(fakeStream{})
 	value := []byte("value")
+	key := "key"
 
-	b.Run("Exec", func(b *testing.B) {
+	b.Run("Factory", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
-			c.Exec("set", String("key"), Bytes(value))
+			c.Exec("set", String(key), Bytes(value))
 		}
 	})
+
+	b.Run("Lambda", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			c.Exec("set",
+				func(w *bufio.Writer) error { return writeString(w, key) },
+				func(w *bufio.Writer) error { return writeBytes(w, value) },
+			)
+		}
+	})
+
 }
 
 func (c client) Exec2(cmd string, args func(*sender)) error {
