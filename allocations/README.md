@@ -18,16 +18,16 @@ go test -bench=. -benchmem .
 goos: linux
 goarch: amd64
 pkg: github.com/yarcat/playground/allocations
-BenchmarkSet/Set-8                      38127736                31.16 ns/op            0 B/op          0 allocs/op
-BenchmarkExec/Factory-8                  9092862               114.8 ns/op            56 B/op          2 allocs/op
-BenchmarkExec/Lambda-8                  27203308                40.27 ns/op            0 B/op          0 allocs/op
-BenchmarkExec/Functors/Ptr-8            26227058                40.09 ns/op            0 B/op          0 allocs/op
-BenchmarkExec/Functors/Val-8            26946501                40.84 ns/op            0 B/op          0 allocs/op
-BenchmarkExec/Functors/Hlp-8            13166934                84.49 ns/op            0 B/op          0 allocs/op
-BenchmarkExecI/ExecI-8                  27920743                39.74 ns/op            0 B/op          0 allocs/op
-BenchmarkExec2/Exec2-8                  18925665                63.70 ns/op           24 B/op          1 allocs/op
-BenchmarkExec3/Exec3-8                  33926996                34.66 ns/op            0 B/op          0 allocs/op
-BenchmarkExec4/Exec4-8                  31617224                34.48 ns/op            0 B/op          0 allocs/op
+BenchmarkSet-8                                  31356510                31.91 ns/op            0 B/op          0 allocs/op
+BenchmarkExecFuncBufio/Factory-8                 9852060               116.30 ns/op           56 B/op          2 allocs/op
+BenchmarkExecFuncBufio/Lambda-8                 31124596                37.93 ns/op            0 B/op          0 allocs/op
+BenchmarkExecFuncBufio/Functors/Ptr-8           29809599                39.97 ns/op            0 B/op          0 allocs/op
+BenchmarkExecFuncBufio/Functors/Val-8           26675809                41.56 ns/op            0 B/op          0 allocs/op
+BenchmarkExecFuncBufio/Functors/Hlp-8           13596487                86.17 ns/op            0 B/op          0 allocs/op
+BenchmarkExecI-8                                28307331                39.82 ns/op            0 B/op          0 allocs/op
+BenchmarkExecFuncSenderPtr-8                    17440234                63.30 ns/op           24 B/op          1 allocs/op
+BenchmarkExecFuncSenderVal-8                    32717740                34.39 ns/op            0 B/op          0 allocs/op
+BenchmarkExecFuncSenderPrealloc-8               32952367                33.92 ns/op            0 B/op          0 allocs/op
 PASS
-ok      github.com/yarcat/playground/allocations        14.660s
+ok      github.com/yarcat/playground/allocations        13.690s
 ```
