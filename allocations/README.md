@@ -18,14 +18,16 @@ go test -bench=. -benchmem .
 goos: linux
 goarch: amd64
 pkg: github.com/yarcat/playground/allocations
-BenchmarkSet/Set-8      35552845                32.49 ns/op            0 B/op          0 allocs/op
-BenchmarkExec/Factory-8                  9541806               123.0 ns/op            56 B/op          2 allocs/op
-BenchmarkExec/Lambda-8                  27838359                43.37 ns/op            0 B/op          0 allocs/op
-BenchmarkExec/Functors-8                27430675                41.27 ns/op            0 B/op          0 allocs/op
-BenchmarkExecI/ExecI-8                  26037552                40.00 ns/op            0 B/op          0 allocs/op
-BenchmarkExec2/Exec2-8                  16896396                62.85 ns/op           24 B/op          1 allocs/op
-BenchmarkExec3/Exec3-8                  30386654                35.93 ns/op            0 B/op          0 allocs/op
-BenchmarkExec4/Exec4-8                  31253431                35.20 ns/op            0 B/op          0 allocs/op
+BenchmarkSet/Set-8                      38127736                31.16 ns/op            0 B/op          0 allocs/op
+BenchmarkExec/Factory-8                  9092862               114.8 ns/op            56 B/op          2 allocs/op
+BenchmarkExec/Lambda-8                  27203308                40.27 ns/op            0 B/op          0 allocs/op
+BenchmarkExec/Functors/Ptr-8            26227058                40.09 ns/op            0 B/op          0 allocs/op
+BenchmarkExec/Functors/Val-8            26946501                40.84 ns/op            0 B/op          0 allocs/op
+BenchmarkExec/Functors/Hlp-8            13166934                84.49 ns/op            0 B/op          0 allocs/op
+BenchmarkExecI/ExecI-8                  27920743                39.74 ns/op            0 B/op          0 allocs/op
+BenchmarkExec2/Exec2-8                  18925665                63.70 ns/op           24 B/op          1 allocs/op
+BenchmarkExec3/Exec3-8                  33926996                34.66 ns/op            0 B/op          0 allocs/op
+BenchmarkExec4/Exec4-8                  31617224                34.48 ns/op            0 B/op          0 allocs/op
 PASS
-ok      github.com/yarcat/playground/allocations        10.444s
+ok      github.com/yarcat/playground/allocations        14.660s
 ```

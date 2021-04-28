@@ -120,6 +120,37 @@ func (c client) Exec(cmd string, exec ...ExecArgFunc) error {
 	return err
 }
 
+// StringWriter2 uses value unline StringWriter, which uses a pointer.
+type StringWriter2 struct{ s string }
+
+func (sw StringWriter2) WriteArg(w *bufio.Writer) error {
+	_, err := w.WriteString(sw.s)
+	return err
+}
+
+// BytesWriter2 uses value unline BytesWriter, which uses a pointer.
+type BytesWriter2 struct{ b []byte }
+
+func (bw BytesWriter2) WriteArg(w *bufio.Writer) error {
+	_, err := w.Write(bw.b)
+	return err
+}
+
+func String2(s string) ExecArgFunc { return StringWriter2{s}.WriteArg }
+func Bytes2(b []byte) ExecArgFunc  { return BytesWriter2{b}.WriteArg }
+
+type setter struct{ s *sender }
+
+func Set(c client) setter { return setter{c.s.String("set")} }
+func (s setter) KV(key, value ExecArgFunc) setter {
+	s.s.String(" ")
+	key(s.s.w)
+	s.s.String(" ")
+	value(s.s.w)
+	return s
+}
+func (s setter) Exec() error { return s.s.Send() }
+
 func BenchmarkExec(b *testing.B) {
 	c := newClient(fakeStream{})
 	value := []byte("value")
@@ -141,12 +172,27 @@ func BenchmarkExec(b *testing.B) {
 	})
 
 	b.Run("Functors", func(b *testing.B) {
-		for n := 0; n < b.N; n++ {
-			c.Exec("set",
-				StringWriter{&key}.WriteArg,
-				BytesWriter{&value}.WriteArg,
-			)
-		}
+		b.Run("Ptr", func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				c.Exec("set",
+					StringWriter{&key}.WriteArg,
+					BytesWriter{&value}.WriteArg,
+				)
+			}
+		})
+		b.Run("Val", func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				c.Exec("set", String2(key), Bytes2(value))
+			}
+		})
+		b.Run("Hlp", func(b *testing.B) {
+			for n := 0; n < b.N; n++ {
+				Set(c).
+					KV(String2(key), Bytes2(value)).
+					KV(String2("key"), Bytes2(value)).
+					Exec()
+			}
+		})
 	})
 }
 
