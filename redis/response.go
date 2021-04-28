@@ -99,7 +99,7 @@ func readInt(r *bufio.Reader) (n int, err error) {
 	} else if b == '-' {
 		sign = -1
 	} else {
-		r.UnreadByte()
+		n = int(b - '0') // Not using unread to save one iteration.
 	}
 	for {
 		b, err := r.ReadByte()

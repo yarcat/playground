@@ -16,15 +16,25 @@ func init() {
 		log.Fatalf("dial failed: %v", err)
 	}
 	client = redis.NewClient(conn)
+	stream = redis.NewStream(conn)
 }
+
+const noResultLogging = false
 
 var (
 	client redis.Client
+	stream *redis.Stream
 	buf    = make([]byte, 100)
 )
 
 func BenchmarkRun(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		run(client, buf, false /*withResultLogging*/)
+		run(client, buf, noResultLogging)
+	}
+}
+
+func BenchmarkRun2(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		run2(stream, buf, noResultLogging)
 	}
 }

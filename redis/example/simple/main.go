@@ -19,8 +19,49 @@ func main() {
 	}
 	defer conn.Close()
 
-	c := redis.NewClient(logging{conn})
-	run(c, make([]byte, 100) /*buf*/, true /*withResultLogging*/)
+	const logResults = true
+	buf := make([]byte, 100)
+
+	// c := redis.NewClient(logging{conn})
+	// run(c, buf /*buf*/, logResults)
+
+	stream := redis.NewStream(logging{conn})
+	run2(stream, buf, logResults)
+}
+
+func run2(stream *redis.Stream, b []byte, withResultLogging bool) {
+	switch status, err := redis.Execute(stream, "SET",
+		redis.String("mykey"), redis.String("myvalue")).Void(); {
+	case err != nil:
+		log.Fatalf("set: %v", err)
+	case !status.OK():
+		log.Printf("-set: %s", status.Bytes())
+	case withResultLogging:
+		log.Printf("+set: %s", status.Bytes())
+	}
+
+	var n int
+	switch status, err := redis.Execute(stream, "EXISTS",
+		redis.String("mykey"), redis.String("kk"), redis.String("does not exist")).Int(&n); {
+	case err != nil:
+		log.Fatalf("exists: %v", err)
+	case !status.OK():
+		log.Printf("-exists: %s", status.Bytes())
+	case withResultLogging:
+		log.Printf("+exists: %d (expected=%v)", n, n == 2)
+	}
+
+	for _, k := range []string{"mykey", "nosuchkey"} {
+		var ok bool
+		switch status, err := redis.Execute(stream, "GET", redis.String(k)).Bytes(b[:], &n, &ok); {
+		case err != nil:
+			log.Fatalf("get: %v", err)
+		case !status.OK():
+			log.Printf("-get: %v", status.Bytes())
+		case withResultLogging:
+			log.Printf("+get: %q (found=%v)", b[:n], ok)
+		}
+	}
 }
 
 func run(c redis.Client, buf []byte, withResultLogging bool) {
