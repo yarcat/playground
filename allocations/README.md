@@ -4,12 +4,7 @@ An attempt to see what leads to alloc-free code in Golang and what not.
 
 ## Surprises
 
-I've managed to make the `ExecInterface` version to be allocation-free. However,
-I had to use pointers to a string and a byte-slice for this. If `StringWriter`
-(or `BytesWriter`) is simply based on a string, then there is 16 bytes per string
-and 24 per slice allocation for every option. Which makes sense, since interfaces
-cannot contain values, but this is a good reminder to think more than twice while
-using interfaces.
+TBD
 
 ## Current Results
 
