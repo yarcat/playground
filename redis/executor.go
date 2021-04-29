@@ -66,6 +66,10 @@ func Execute(stream *Stream, cmd string, args ...ExecuteArgFunc) ExecuteResult {
 	return ExecuteResult{r: stream.r, err: sender.s.Finish()}
 }
 
+// ArrayItem returns ExecuteResult without sending requests. The function is
+// meant for consuming array items.
+func ArrayItem(stream *Stream) ExecuteResult { return ExecuteResult{r: stream.r} }
+
 // Status contains errors received from Redis responses.
 type Status struct{ b []byte }
 
@@ -145,6 +149,24 @@ func (er ExecuteResult) Bytes(data []byte, n *int, found *bool) (status Status, 
 		return status, err
 	}
 	return Status{msgUnexpectedResponse}, consumeResponse(er.r)
+}
+
+// Array expects an array.
+func (er ExecuteResult) Array(n *int) (status Status, err error) {
+	if er.err != nil {
+		return status, er.err
+	}
+	switch b, err := er.r.ReadByte(); {
+	case err != nil:
+		return status, err
+	case b != '*':
+		if err = er.r.UnreadByte(); err != nil {
+			return status, err
+		}
+		return Status{msgUnexpectedResponse}, consumeResponse(er.r)
+	}
+	*n, err = readInt(er.r)
+	return status, err
 }
 
 func readBytes(r *bufio.Reader, b []byte, n int) error {

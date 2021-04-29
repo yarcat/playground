@@ -136,6 +136,30 @@ func runV2(stream *redis.Stream, b []byte, withResultLogging bool) {
 			log.Printf("+get: %q (found=%v)", b[:n], ok)
 		}
 	}
+
+	switch status, err := redis.Execute(stream, "MGET",
+		redis.String("mykey"), redis.String("nosuchkey"), redis.String("mykey"),
+	).Array(&n); {
+	case err != nil:
+		log.Fatalf("mget: %v", err)
+	case !status.OK():
+		log.Printf("-mget: %v", status.Bytes())
+	default:
+		for i := 0; i < n; i++ {
+			var (
+				n  int
+				ok bool
+			)
+			switch status, err := redis.ArrayItem(stream).Bytes(b, &n, &ok); {
+			case err != nil:
+				log.Fatalf("mget[%d]: %v", i, err)
+			case !status.OK():
+				log.Printf("-mget[%d]: %v", i, status.Bytes())
+			case withResultLogging:
+				log.Printf("+mget[%d]: %q (found=%v)", i, b[:n], ok)
+			}
+		}
+	}
 }
 
 func runV1(c redis.Client, buf []byte, withResultLogging bool) {
