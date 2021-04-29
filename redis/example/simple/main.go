@@ -22,8 +22,8 @@ func main() {
 	const logResults = true
 	buf := make([]byte, 100)
 
-	// c := redis.NewClient(logging{conn})
-	// run(c, buf /*buf*/, logResults)
+	c := redis.NewClient(logging{conn})
+	run(c, buf /*buf*/, logResults)
 
 	stream := redis.NewStream(logging{conn})
 	run2(stream, buf, logResults)
@@ -65,58 +65,23 @@ func run2(stream *redis.Stream, b []byte, withResultLogging bool) {
 }
 
 func run(c redis.Client, buf []byte, withResultLogging bool) {
-	resp, err := c.SetString("mykey", "myvalue\x00")
-	if err == nil {
-		err = resp.ErrorOrConsume()
-	}
-	if err != nil {
-		log.Fatalf("set failed: %v", err)
+	if err := wrap(c.SetString("mykey", "myvalue\x00")).Ignore(); err != nil {
+		log.Fatalln("- set:", err)
+	} else if withResultLogging {
+		log.Println("+ set: OK")
 	}
 
-	resp, err = c.Exists("mykey", "kk", "mykey2")
-	if err == nil {
-		err = resp.Error()
-	}
-	if err != nil {
-		log.Fatalf("exist failed: %v", err)
-	}
-	var n int
-	if n, err = resp.Int(); err != nil {
-		log.Fatalf("int failed: %v", err)
-	}
-	if withResultLogging {
-		log.Printf("exists = %v", n)
+	if n, err := wrap(c.Exists("mykey", "kk", "mykey2")).Int(); err != nil {
+		log.Fatalln("- exists:", err)
+	} else if withResultLogging {
+		log.Println("+ exists:", n)
 	}
 
-	resp, err = c.Get("mykey")
-	if err == nil {
-		err = resp.Error()
-	}
-	if err != nil {
-		log.Fatalf("get failed: %v", err)
-	}
-	if n, err = resp.BytesBulk(buf); err != nil {
-		log.Fatalf("get failed: %v", err)
-	}
-	if withResultLogging {
-		log.Printf("get = %q", buf[:n])
-	}
-
-	resp, err = c.Get("nosuchkey")
-	if err == nil {
-		err = resp.Error()
-	}
-	if err != nil {
-		log.Fatalf("get failed: %v", err)
-	}
-	if n, err = resp.BytesBulk(buf); err != nil {
-		log.Fatalf("get failed: %v", err)
-	}
-	if withResultLogging {
-		if n >= 0 {
-			log.Printf("get = %q", buf[:n])
-		} else {
-			log.Println("get = nil")
+	for _, k := range []string{"mykey", "nosuchkey"} {
+		if n, ok, err := wrap(c.Get(k)).Bulk(buf); err != nil {
+			log.Fatalln("- get:", err)
+		} else if withResultLogging {
+			log.Printf("+ get: %q (found=%v)\n", buf[:n], ok)
 		}
 	}
 }
@@ -126,4 +91,41 @@ type logging struct{ io.ReadWriter }
 func (l logging) Write(b []byte) (int, error) {
 	log.Printf("WRITE: %q", b)
 	return l.ReadWriter.Write(b)
+}
+
+type wrappedResponse struct {
+	resp redis.Response
+	err  error
+}
+
+func wrap(resp redis.Response, err error) wrappedResponse {
+	return wrappedResponse{resp: resp, err: err}
+}
+
+func (wr wrappedResponse) Ignore() error {
+	if wr.err != nil {
+		return wr.err
+	}
+	return wr.resp.ErrorOrConsume()
+}
+
+func (wr wrappedResponse) Int() (n int, err error) {
+	if wr.err != nil {
+		return 0, wr.err
+	}
+	return wr.resp.Int()
+}
+
+func (wr wrappedResponse) Bulk(buf []byte) (int, bool, error) {
+	if wr.err != nil {
+		return 0, false, wr.err
+	}
+	switch n, err := wr.resp.BytesBulk(buf); {
+	case err != nil:
+		return 0, false, err
+	case n < 0:
+		return 0, false, nil
+	default:
+		return n, true, nil
+	}
 }
