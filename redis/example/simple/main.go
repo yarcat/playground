@@ -5,28 +5,74 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
+
+	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/yarcat/playground/redis"
 )
 
 func main() {
-	addr := flag.String("addr", ":6379", "redis endpoint")
+	addr := flag.String("addr", ":6379", "redis `endpoint`")
+	pprof := flag.String("pprof", ":8687", "serve `addr` for pprof")
+	iterations := flag.Int("iterations", 1, "how many `times` to loop")
+	extraLogging := flag.Bool("extra_logging", true, "whether results and writes should be logged")
+
 	flag.Parse()
 
-	conn, err := net.Dial("tcp", *addr)
-	if err != nil {
-		log.Fatalf("dial failed: %v", err)
-	}
-	defer conn.Close()
+	go func() { log.Fatal(http.ListenAndServe(*pprof, nil)) }()
 
-	const logResults = true
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	conn1 := mustConnect(*addr, *extraLogging)
+	defer conn1.Close()
+
+	go func() {
+		defer wg.Done()
+		client := redis.NewClient(conn1)
+		run(*iterations, "V1", func(buf []byte) {
+			runV1(client, buf, *extraLogging)
+		})
+	}()
+
+	conn2 := mustConnect(*addr, *extraLogging)
+	defer conn2.Close()
+
+	go func() {
+		defer wg.Done()
+		stream := redis.NewStream(conn2)
+		run(*iterations, "V2", func(buf []byte) {
+			runV2(stream, buf, *extraLogging)
+		})
+	}()
+
+	wg.Wait()
+}
+
+func run(times int, version string, f func([]byte)) {
 	buf := make([]byte, 100)
 
-	c := redis.NewClient(logging{conn})
-	runV1(c, buf /*buf*/, logResults)
+	for i := 1; i <= times; i++ {
+		if i%500 == 1 {
+			log.Printf("%s: %d of %d (%.2f%%)",
+				version, i, times, float64(i)/float64(times))
+		}
+		f(buf)
+	}
+	log.Printf("%s: done", version)
+}
 
-	stream := redis.NewStream(logging{conn})
-	runV2(stream, buf, logResults)
+func mustConnect(endpoint string, extraLogging bool) io.ReadWriteCloser {
+	conn, err := net.Dial("tcp", endpoint)
+	if err != nil {
+		panic(err)
+	}
+	if extraLogging {
+		return logging{conn}
+	}
+	return conn
 }
 
 func runV2(stream *redis.Stream, b []byte, withResultLogging bool) {
@@ -86,11 +132,11 @@ func runV1(c redis.Client, buf []byte, withResultLogging bool) {
 	}
 }
 
-type logging struct{ io.ReadWriter }
+type logging struct{ io.ReadWriteCloser }
 
 func (l logging) Write(b []byte) (int, error) {
 	log.Printf("WRITE: %q", b)
-	return l.ReadWriter.Write(b)
+	return l.ReadWriteCloser.Write(b)
 }
 
 type wrappedResponse struct {
