@@ -57,7 +57,7 @@ func run(times int, version string, f func([]byte)) {
 	for i := 1; i <= times; i++ {
 		if i%500 == 1 {
 			log.Printf("%s: %d of %d (%.2f%%)",
-				version, i, times, float64(i)/float64(times))
+				version, i, times, 100.0*float64(i)/float64(times))
 		}
 		f(buf)
 	}
