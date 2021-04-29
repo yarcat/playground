@@ -106,7 +106,7 @@ func (wr wrappedResponse) Ignore() error {
 	if wr.err != nil {
 		return wr.err
 	}
-	return wr.resp.ErrorOrConsume()
+	return wr.resp.Void()
 }
 
 func (wr wrappedResponse) Int() (n int, err error) {

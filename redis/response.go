@@ -3,93 +3,70 @@ package redis
 import (
 	"bufio"
 	"fmt"
-	"io"
 )
 
 type Response struct {
 	r *bufio.Reader
 }
 
-func (r Response) Error() error {
-	b, err := r.r.ReadByte()
+func (r Response) error() error {
+	buf, err := r.r.ReadSlice('\n')
 	if err != nil {
 		return err
 	}
-	if b != '-' {
-		r.r.UnreadByte()
-		return nil
+	return fmt.Errorf("%w: %s", ErrStatus, dropCRLF(buf))
+}
+
+func (r Response) consumeAndErrUnexpected(b byte, want string) (err error) {
+	if err = consumeResponse(r.r); err != nil {
+		return err
 	}
-	// It's ok to create a scanner here, since error cases
-	buf, err := r.r.ReadSlice('\n')
-	if err != nil {
-		return fmt.Errorf("%v: %v", ErrInternal, err)
-	}
-	if l := len(buf); l > 0 && buf[l-1] == '\n' {
-		buf = buf[:l-1]
-	}
-	return fmt.Errorf("%w: %s", ErrResponse, buf)
+	return fmt.Errorf("%w: got=%q, want=%s", ErrFirstByte, b, want)
 }
 
 func (r Response) Int() (n int, err error) {
-	b, err := r.r.ReadByte()
-	if err != nil {
-		return
-	}
-	if b != ':' {
-		return 0, fmt.Errorf("%w: got=%q, want=':'", ErrFirstByte, b)
+	switch b, err := r.r.ReadByte(); {
+	case err != nil:
+		return 0, err
+	case b == '-':
+		return 0, r.error()
+	case b != ':':
+		r.r.UnreadByte()
+		return 0, r.consumeAndErrUnexpected(b, "':'")
 	}
 	return r.int()
 }
 
-func (r Response) BytesSimple() (buf []byte, err error) {
-	b, err := r.r.ReadByte()
-	if err != nil {
-		return
+func (r Response) Void() error {
+	switch b, err := r.r.ReadByte(); {
+	case err != nil:
+		return err
+	case b == '-':
+		return r.error()
+	case b != '+':
+		r.r.UnreadByte()
+		return r.consumeAndErrUnexpected(b, "'+'")
 	}
-	if b != '+' {
-		return nil, fmt.Errorf(`%w: got=%q, want='+'`, ErrFirstByte, b)
-	}
-	buf, err = r.r.ReadBytes('\n')
-	if l := len(buf); l > 0 && buf[l-1] == '\n' {
-		buf = buf[:l-1]
-	}
-	return
+	_, err := r.r.ReadSlice('\n')
+	return err
 }
 
 func (r Response) int() (n int, err error) { return readInt(r.r) }
 
 func (r Response) BytesBulk(buf []byte) (n int, err error) {
-	b, err := r.r.ReadByte()
-	if err != nil {
+	switch b, err := r.r.ReadByte(); {
+	case err != nil:
 		return 0, err
-	}
-	if b != '$' {
-		return 0, fmt.Errorf("%w: got=%q, want='$'", ErrFirstByte, b)
+	case b == '-':
+		return 0, r.error()
+	case b != '$':
+		r.r.UnreadByte()
+		return 0, r.consumeAndErrUnexpected(b, "'$'")
 	}
 	if n, err = r.int(); n < 0 || err != nil {
 		return
 	}
-	if len(buf) > n {
-		buf = buf[:n]
-	}
-	if _, err = io.ReadFull(r.r, buf); err != nil {
-		return 0, err
-	}
-	if d := n - len(buf); d > 0 {
-		n = len(buf)
-		if _, err = r.r.Discard(d); err != nil {
-			return n, err
-		}
-	}
-	_, err = r.r.Discard(2) // Skip EOL.
-	return n, err
-}
-
-func (r Response) ErrorOrConsume() error {
-	if err := r.Error(); err != nil {
-		return err
-	}
-	return consumeResponse(r.r)
+	return n, readBytes(r.r, buf, n)
 }
 
 func readInt(r *bufio.Reader) (n int, err error) {
