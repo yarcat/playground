@@ -29,12 +29,12 @@ var (
 
 func BenchmarkRun(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		run(client, buf, noResultLogging)
+		runV1(client, buf, noResultLogging)
 	}
 }
 
 func BenchmarkRun2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		run2(stream, buf, noResultLogging)
+		runV2(stream, buf, noResultLogging)
 	}
 }

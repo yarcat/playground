@@ -23,13 +23,13 @@ func main() {
 	buf := make([]byte, 100)
 
 	c := redis.NewClient(logging{conn})
-	run(c, buf /*buf*/, logResults)
+	runV1(c, buf /*buf*/, logResults)
 
 	stream := redis.NewStream(logging{conn})
-	run2(stream, buf, logResults)
+	runV2(stream, buf, logResults)
 }
 
-func run2(stream *redis.Stream, b []byte, withResultLogging bool) {
+func runV2(stream *redis.Stream, b []byte, withResultLogging bool) {
 	switch status, err := redis.Execute(stream, "SET",
 		redis.String("mykey"), redis.String("my\x00value")).Void(); {
 	case err != nil:
@@ -64,7 +64,7 @@ func run2(stream *redis.Stream, b []byte, withResultLogging bool) {
 	}
 }
 
-func run(c redis.Client, buf []byte, withResultLogging bool) {
+func runV1(c redis.Client, buf []byte, withResultLogging bool) {
 	if err := wrap(c.SetString("mykey", "my\x00value")).Ignore(); err != nil {
 		log.Fatalln("-set:", err)
 	} else if withResultLogging {
