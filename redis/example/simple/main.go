@@ -5,6 +5,8 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"runtime/trace"
 	"sync"
 
 	"net/http"
@@ -15,13 +17,24 @@ import (
 
 func main() {
 	addr := flag.String("addr", ":6379", "redis `endpoint`")
-	pprof := flag.String("pprof", ":8687", "serve `addr` for pprof")
+
 	iterations := flag.Int("iterations", 1, "how many `times` to loop")
 	extraLogging := flag.Bool("extra_logging", true, "whether results and writes should be logged")
 
+	pprof := flag.String("pprof", "", "serve `addr` for pprof")
+	traceFile := flag.String("trace_profile", "", "trace output file")
+
 	flag.Parse()
 
-	go func() { log.Fatal(http.ListenAndServe(*pprof, nil)) }()
+	if *pprof != "" {
+		go func() { log.Fatal(http.ListenAndServe(*pprof, nil)) }()
+	}
+	if *traceFile != "" {
+		f := mustCreateFile(*traceFile)
+		defer f.Close()
+		stop := mustTraceStart(f)
+		defer stop()
+	}
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -49,6 +62,21 @@ func main() {
 	}()
 
 	wg.Wait()
+}
+
+func mustCreateFile(name string) *os.File {
+	f, err := os.Create(name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return f
+}
+
+func mustTraceStart(w io.Writer) (stop func()) {
+	if err := trace.Start(w); err != nil {
+		log.Fatal(err)
+	}
+	return trace.Stop
 }
 
 func run(times int, version string, f func([]byte)) {
