@@ -31,7 +31,7 @@ func main() {
 
 func run2(stream *redis.Stream, b []byte, withResultLogging bool) {
 	switch status, err := redis.Execute(stream, "SET",
-		redis.String("mykey"), redis.String("myvalue")).Void(); {
+		redis.String("mykey"), redis.String("my\x00value")).Void(); {
 	case err != nil:
 		log.Fatalf("set: %v", err)
 	case !status.OK():
@@ -65,23 +65,23 @@ func run2(stream *redis.Stream, b []byte, withResultLogging bool) {
 }
 
 func run(c redis.Client, buf []byte, withResultLogging bool) {
-	if err := wrap(c.SetString("mykey", "myvalue\x00")).Ignore(); err != nil {
-		log.Fatalln("- set:", err)
+	if err := wrap(c.SetString("mykey", "my\x00value")).Ignore(); err != nil {
+		log.Fatalln("-set:", err)
 	} else if withResultLogging {
-		log.Println("+ set: OK")
+		log.Println("+set: OK")
 	}
 
 	if n, err := wrap(c.Exists("mykey", "kk", "mykey2")).Int(); err != nil {
-		log.Fatalln("- exists:", err)
+		log.Fatalln("-exists:", err)
 	} else if withResultLogging {
-		log.Println("+ exists:", n)
+		log.Println("+exists:", n)
 	}
 
 	for _, k := range []string{"mykey", "nosuchkey"} {
 		if n, ok, err := wrap(c.Get(k)).Bulk(buf); err != nil {
-			log.Fatalln("- get:", err)
+			log.Fatalln("-get:", err)
 		} else if withResultLogging {
-			log.Printf("+ get: %q (found=%v)\n", buf[:n], ok)
+			log.Printf("+get: %q (found=%v)\n", buf[:n], ok)
 		}
 	}
 }

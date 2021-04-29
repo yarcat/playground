@@ -34,7 +34,7 @@ func (send Sender) ByteRaw(b byte) {
 }
 
 // String sends the string provided in a binary-safe mode.
-func (send Sender) String(s string) { send.s.String(s) }
+func (send Sender) String(s string) { send.s.StringEscaped(s) }
 
 // Bytes sends the bytes provided in a binary-safe mode.
 // func (send Sender) Bytes(b []byte) { send.s.Bytes(b) }
