@@ -30,15 +30,15 @@ func (tx *sender) StringEscaped(s string) *sender {
 	for i := 0; i < len(s); {
 		switch b := s[i]; {
 		case b == '\\':
-			tx.String(string(s)[:i])
+			tx.String(s[:i])
 			tx.String(`\\`)
 			s, i = s[i+1:], 0
 		case b == '"':
-			tx.String(string(s)[:i])
+			tx.String(s[:i])
 			tx.String(`\"`)
 			s, i = s[i+1:], 0
 		case b < 32:
-			tx.String(string(s)[:i])
+			tx.String(s[:i])
 			tx.String(escapes[b])
 			s, i = s[i+1:], 0
 		default:
@@ -46,7 +46,7 @@ func (tx *sender) StringEscaped(s string) *sender {
 		}
 	}
 	if len(s) > 0 {
-		tx.String(string(s))
+		tx.String(s)
 	}
 	return tx
 }
