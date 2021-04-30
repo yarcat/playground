@@ -3,15 +3,18 @@ package redis
 import "bufio"
 
 type sender struct {
-	w   *bufio.Writer
-	err error
+	w    *bufio.Writer
+	err  error
+	size int
 }
 
 func newSender(w *bufio.Writer) *sender { return &sender{w: w} }
 
 func (tx *sender) String(s string) *sender {
 	if tx.err == nil {
-		_, tx.err = tx.w.WriteString(s)
+		var size int
+		size, tx.err = tx.w.WriteString(s)
+		tx.size += size
 	}
 	return tx
 }
@@ -22,6 +25,8 @@ var escapes = [32]string{
 	`\x10`, `\x11`, `\x12`, `\x13`, `\x14`, `\x15`, `\x16`, `\x17`,
 	`\x18`, `\x19`, `\x1a`, `\x1b`, `\x1c`, `\x1d`, `\x1e`, `\x1f`,
 }
+
+func (tx *sender) Result() (int, error) { return tx.size, tx.err }
 
 func (tx *sender) StringEscaped(s string) *sender {
 	if tx.err != nil {

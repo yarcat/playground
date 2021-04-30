@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/yarcat/playground/redis"
+	"github.com/yarcat/playground/redis/protocol"
 )
 
 func init() {
@@ -17,6 +18,7 @@ func init() {
 	}
 	client = redis.NewClient(conn)
 	stream = redis.NewStream(conn)
+	proto = protocol.New(redis.NewConn(conn))
 }
 
 const noResultLogging = false
@@ -25,6 +27,7 @@ var (
 	client redis.Client
 	stream *redis.Stream
 	buf    = make([]byte, 100)
+	proto  *protocol.Protocol
 )
 
 func BenchmarkRun(b *testing.B) {
@@ -36,5 +39,11 @@ func BenchmarkRun(b *testing.B) {
 func BenchmarkRun2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		runV2(stream, buf, noResultLogging)
+	}
+}
+
+func BenchmarkRun3(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		runV3(proto, buf, noResultLogging)
 	}
 }

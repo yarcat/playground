@@ -7,19 +7,30 @@ import (
 	"net"
 	"os"
 	"runtime/trace"
+	"sort"
+	"strings"
 	"sync"
 
 	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/yarcat/playground/redis"
+	"github.com/yarcat/playground/redis/protocol"
 )
 
 func main() {
-	addr := flag.String("addr", ":6379", "redis `endpoint`")
+	runners := versionRunners{
+		"v1": (runner).RunV1,
+		"v2": (runner).RunV2,
+		"v3": (runner).RunV3,
+	}
+
+	redisAddr := flag.String("redis_addr", ":6379", "redis backend `host:port`")
 
 	iterations := flag.Int("iterations", 1, "how many `times` to loop")
 	extraLogging := flag.Bool("extra_logging", true, "whether results and writes should be logged")
+	versions := flag.String("versions", strings.Join(runners.All(), ","),
+		"comma-separated string `list` of implementation versions to run")
 
 	pprof := flag.String("pprof", "", "serve `addr` for pprof")
 	traceFile := flag.String("trace_profile", "", "trace output file")
@@ -36,32 +47,71 @@ func main() {
 		defer stop()
 	}
 
+	r := runner{
+		redisAddr:    *redisAddr,
+		extraLogging: *extraLogging,
+		iterations:   *iterations,
+		runners:      runners,
+	}
 	var wg sync.WaitGroup
-	wg.Add(2)
-
-	conn1 := mustConnect(*addr, *extraLogging)
-	defer conn1.Close()
-
-	go func() {
-		defer wg.Done()
-		client := redis.NewClient(conn1)
-		run(*iterations, "V1", func(buf []byte) {
-			runV1(client, buf, *extraLogging)
-		})
-	}()
-
-	conn2 := mustConnect(*addr, *extraLogging)
-	defer conn2.Close()
-
-	go func() {
-		defer wg.Done()
-		stream := redis.NewStream(conn2)
-		run(*iterations, "V2", func(buf []byte) {
-			runV2(stream, buf, *extraLogging)
-		})
-	}()
-
+	for _, v := range strings.Split(*versions, ",") {
+		wg.Add(1)
+		v := v
+		go func() {
+			defer wg.Done()
+			r.Run(v)
+		}()
+	}
 	wg.Wait()
+}
+
+type versionRunners map[string]func(runner, io.ReadWriter)
+
+func (vr versionRunners) All() (versions []string) {
+	for v := range vr {
+		versions = append(versions, v)
+	}
+	sort.Strings(versions)
+	return versions
+}
+
+type runner struct {
+	redisAddr    string
+	extraLogging bool
+	iterations   int
+	runners      versionRunners
+}
+
+func (r runner) Run(version string) {
+	version = strings.ToLower(strings.TrimSpace(version))
+	f, ok := r.runners[version]
+	if !ok {
+		return
+	}
+	conn := mustConnect(r.redisAddr, r.extraLogging)
+	defer conn.Close()
+	f(r, conn)
+}
+
+func (r runner) RunV1(rw io.ReadWriter) {
+	client := redis.NewClient(rw)
+	run(r.iterations, "v1", func(buf []byte) {
+		runV1(client, buf, r.extraLogging)
+	})
+}
+
+func (r runner) RunV2(rw io.ReadWriter) {
+	stream := redis.NewStream(rw)
+	run(r.iterations, "v2", func(buf []byte) {
+		runV2(stream, buf, r.extraLogging)
+	})
+}
+
+func (r runner) RunV3(rw io.ReadWriter) {
+	p := protocol.New(redis.NewConn(rw))
+	run(r.iterations, "v3", func(buf []byte) {
+		runV3(p, buf, r.extraLogging)
+	})
 }
 
 func mustCreateFile(name string) *os.File {
@@ -101,6 +151,44 @@ func mustConnect(endpoint string, extraLogging bool) io.ReadWriteCloser {
 		return logging{conn}
 	}
 	return conn
+}
+
+type loggingExecutor struct{ p *protocol.Protocol }
+
+func (le loggingExecutor) Exec(cmd string, args protocol.ArgFunc, res protocol.ResFunc) {
+	if err := protocol.Exec(le.p, cmd, args, res); err != nil {
+		log.Fatalf("!%v: %v", strings.ToLower(cmd), err)
+	}
+}
+
+type statusLogger struct {
+	str string
+	log bool
+}
+
+func (sl statusLogger) Log(data []byte, ok bool) {
+	if !sl.log {
+		return
+	}
+	if ok {
+		log.Printf("+%s: %s", sl.str, data)
+	} else {
+		log.Printf("-%s: %s", sl.str, data)
+	}
+}
+
+type logFactory struct{ log bool }
+
+func (lf logFactory) Status(cmd string) protocol.SimpleStrFunc {
+	return statusLogger{cmd, lf.log}.Log
+}
+
+func runV3(p *protocol.Protocol, b []byte, withResultLogging bool) {
+	log := logFactory{log: withResultLogging}
+
+	must := loggingExecutor{p}
+	must.Exec("SET", protocol.WriteStrings("mykey", "my\x00value"), protocol.IgnoreOutput())
+	must.Exec("SET", protocol.WriteStrings("mykey", "my\x00value"), protocol.AcceptStatus(log.Status("set")))
 }
 
 func runV2(stream *redis.Stream, b []byte, withResultLogging bool) {
