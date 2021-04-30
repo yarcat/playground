@@ -60,6 +60,24 @@ func (p *Protocol) ConsumeMessage() *Protocol {
 	return p
 }
 
+func (p *Protocol) Consume(m Msg) *Protocol {
+	if p.err == nil {
+		p.err = consume(p.conn.Reader, m)
+	}
+	return p
+}
+
+func (p *Protocol) ReadInt(f func(int)) *Protocol {
+	var n int
+	if p.err == nil {
+		p.err = parseInt(p.conn.Reader, &n)
+	}
+	if p.err == nil {
+		f(n)
+	}
+	return p
+}
+
 func (p *Protocol) FinishRequest() *Protocol {
 	p.WriteString("\r\n")
 	if p.err == nil {

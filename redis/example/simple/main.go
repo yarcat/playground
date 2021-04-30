@@ -184,11 +184,23 @@ func (lf logFactory) Status(cmd string) protocol.SimpleStrFunc {
 }
 
 func runV3(p *protocol.Protocol, b []byte, withResultLogging bool) {
-	log := logFactory{log: withResultLogging}
-
+	l := logFactory{log: withResultLogging}
 	must := loggingExecutor{p}
-	must.Exec("SET", protocol.WriteStrings("mykey", "my\x00value"), protocol.IgnoreOutput())
-	must.Exec("SET", protocol.WriteStrings("mykey", "my\x00value"), protocol.AcceptStatus(log.Status("set")))
+	must.Exec("SET",
+		protocol.WriteStrings("mykey", "my\x00value"),
+		protocol.IgnoreOutput())
+	must.Exec("SET",
+		protocol.WriteStrings("mykey", "my\x00value"),
+		protocol.AcceptStatus(l.Status("set")))
+	must.Exec("EXISTS",
+		protocol.WriteStrings("mykey", "kk", "does not exist"),
+		protocol.AcceptInt(func(n int, status []byte) {
+			if status != nil {
+				log.Printf("-exists: %v", status)
+			} else if withResultLogging {
+				log.Printf("+exists: %v", n)
+			}
+		}))
 }
 
 func runV2(stream *redis.Stream, b []byte, withResultLogging bool) {

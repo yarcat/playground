@@ -36,7 +36,11 @@ func consumeMessage(r *bufio.Reader) error {
 	if err != nil {
 		return err
 	}
-	switch Msg(b) {
+	return consume(r, Msg(b))
+}
+
+func consume(r *bufio.Reader, m Msg) error {
+	switch m {
 	case MsgErr, MsgSimpleStr, MsgInt:
 		return consumeSimpleStr(r)
 	case MsgBulkStr:
