@@ -161,12 +161,12 @@ func (le loggingExecutor) Exec(cmd string, args protocol.ArgFunc, res protocol.R
 	}
 }
 
-type statusLogger struct {
+type logger struct {
 	str string
 	log bool
 }
 
-func (sl statusLogger) Log(data []byte, ok bool) {
+func (sl logger) Status(data []byte, ok bool) {
 	if !sl.log {
 		return
 	}
@@ -177,30 +177,41 @@ func (sl statusLogger) Log(data []byte, ok bool) {
 	}
 }
 
+func (sl logger) Int(n int, status []byte) {
+	if status != nil {
+		log.Printf("-%s: %v", sl.str, status)
+	} else if sl.log {
+		log.Printf("+%s: %v", sl.str, n)
+	}
+}
+
 type logFactory struct{ log bool }
 
 func (lf logFactory) Status(cmd string) protocol.SimpleStrFunc {
-	return statusLogger{cmd, lf.log}.Log
+	return logger{cmd, lf.log}.Status
+}
+
+func (lf logFactory) Int(cmd string) protocol.IntFunc {
+	return logger{cmd, lf.log}.Int
 }
 
 func runV3(p *protocol.Protocol, b []byte, withResultLogging bool) {
-	l := logFactory{log: withResultLogging}
+	log := logFactory{log: withResultLogging}
 	must := loggingExecutor{p}
 	must.Exec("SET",
 		protocol.WriteStrings("mykey", "my\x00value"),
 		protocol.IgnoreOutput())
 	must.Exec("SET",
 		protocol.WriteStrings("mykey", "my\x00value"),
-		protocol.AcceptStatus(l.Status("set")))
+		protocol.AcceptStatus(log.Status("set")))
 	must.Exec("EXISTS",
 		protocol.WriteStrings("mykey", "kk", "does not exist"),
-		protocol.AcceptInt(func(n int, status []byte) {
-			if status != nil {
-				log.Printf("-exists: %v", status)
-			} else if withResultLogging {
-				log.Printf("+exists: %v", n)
-			}
-		}))
+		protocol.AcceptInt(log.Int("exists")))
+	for _, k := range []string{"mykey", "nosuchkey"} {
+		must.Exec("GET",
+			protocol.WriteStrings(k),
+			protocol.AcceptBulk(b, log.Status("get")))
+	}
 }
 
 func runV2(stream *redis.Stream, b []byte, withResultLogging bool) {

@@ -1,6 +1,9 @@
 package protocol
 
 import (
+	"bufio"
+	"io"
+
 	"github.com/yarcat/playground/redis"
 )
 
@@ -78,6 +81,23 @@ func (p *Protocol) ReadInt(f func(int)) *Protocol {
 	return p
 }
 
+// Read reads bulk strings into the buffer. It is expected the stream contains
+// the length line and data.
+func (p *Protocol) Read(buf []byte, f func(int)) *Protocol {
+	if p.err != nil {
+		return p
+	}
+	var n int
+	if p.err = parseInt(p.conn.Reader, &n); p.err != nil {
+		return p
+	} else if n < 0 {
+		f(n)
+	} else if p.err = readBytes(p.conn.Reader, buf, n); p.err == nil {
+		f(n)
+	}
+	return p
+}
+
 func (p *Protocol) FinishRequest() *Protocol {
 	p.WriteString("\r\n")
 	if p.err == nil {
@@ -124,4 +144,19 @@ func dropCRLF(b []byte) []byte {
 	// TODO: add checks for CRLF.
 	l := len(b)
 	return b[:l-2]
+}
+
+func readBytes(r *bufio.Reader, b []byte, n int) error {
+	if len(b) > n {
+		b = b[:n]
+	}
+	if _, err := io.ReadFull(r, b); err != nil {
+		return err
+	}
+	if d := n - len(b); d > 0 {
+		_, err := r.Discard(d)
+		return err
+	}
+	_, err := r.Discard(2) // Skip CRLF
+	return err
 }
