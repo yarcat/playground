@@ -81,20 +81,35 @@ func (p *Protocol) ReadInt(f func(int)) *Protocol {
 	return p
 }
 
-// Read reads bulk strings into the buffer. It is expected the stream contains
-// the length line and data.
-func (p *Protocol) Read(buf []byte, f func(int)) *Protocol {
+type BulkReader struct {
+	max int
+	p   *Protocol
+}
+
+func (br BulkReader) Read(b []byte) int {
+	if br.max < 0 || br.p == nil || br.p.err != nil {
+		return 0
+	}
+	if len(b) > br.max {
+		b = b[:br.max]
+	}
+	br.p.err = readBytes(br.p.conn.Reader, b, br.max)
+	if br.p.err != nil {
+		return 0
+	}
+	return len(b)
+}
+
+func (p *Protocol) ReadBulk(f func(int, BulkReader)) *Protocol {
 	if p.err != nil {
 		return p
 	}
 	var n int
 	if p.err = parseInt(p.conn.Reader, &n); p.err != nil {
 		return p
-	} else if n < 0 {
-		f(n)
-	} else if p.err = readBytes(p.conn.Reader, buf, n); p.err == nil {
-		f(n)
 	}
+	br := BulkReader{n, p}
+	f(n, br)
 	return p
 }
 

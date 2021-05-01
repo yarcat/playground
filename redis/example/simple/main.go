@@ -195,6 +195,25 @@ func (lf logFactory) Int(cmd string) protocol.IntFunc {
 	return logger{cmd, lf.log}.Int
 }
 
+type loggingBulkReader struct {
+	b   []byte
+	lf  logFactory
+	cmd string
+}
+
+func (lbr loggingBulkReader) Accept(msg []byte, n int, r protocol.BulkReader) {
+	r.Read(lbr.b)
+	if msg == nil {
+		lbr.lf.Status(lbr.cmd)(lbr.b[:n], true /*ok*/)
+	} else {
+		lbr.lf.Status(lbr.cmd)(msg, false /*ok*/)
+	}
+}
+
+func readIntoAndLog(b []byte, lf logFactory, cmd string) protocol.BulkStrFunc {
+	return loggingBulkReader{b, lf, cmd}.Accept
+}
+
 func runV3(p *protocol.Protocol, b []byte, withResultLogging bool) {
 	log := logFactory{log: withResultLogging}
 	must := loggingExecutor{p}
@@ -210,7 +229,7 @@ func runV3(p *protocol.Protocol, b []byte, withResultLogging bool) {
 	for _, k := range []string{"mykey", "nosuchkey"} {
 		must.Exec("GET",
 			protocol.WriteStrings(k),
-			protocol.AcceptBulk(b, log.Status("get")))
+			protocol.AcceptBulk(readIntoAndLog(b, log, "get")))
 	}
 }
 
