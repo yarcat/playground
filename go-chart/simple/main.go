@@ -1,20 +1,19 @@
 package main
 
 import (
-	"bytes"
+	"image"
+	"io"
 	"log"
 	"math"
 	"math/rand"
-	"os"
 	"time"
 
-	"github.com/wcharczuk/go-chart"
-	"github.com/wcharczuk/go-chart/drawing"
+	"github.com/wcharczuk/go-chart/v2"
+	"github.com/wcharczuk/go-chart/v2/drawing"
 )
 
-func timeseries(f func(time.Time) float64) (x []time.Time, y []float64) {
+func timeseries(dt time.Duration, f func(time.Time) float64) (x []time.Time, y []float64) {
 	now := time.Now()
-	const dt = time.Second
 	for t := now.Add(-24 * time.Hour); now.After(t); t = t.Add(dt) {
 		x = append(x, t)
 		y = append(y, f(t))
@@ -74,9 +73,18 @@ func makeLine(x []time.Time, c drawing.Color, v float64) chart.TimeSeries {
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	//x, y := timeseries(fixed(50))
-	x, y := timeseries(random())
-	log.Println(len(x))
+	const (
+		dt                = 60 * time.Second
+		widthPx, heightPx = 200, 200
+	)
+	x, y := timeseries(dt, fixed(50))
+	//x, y := timeseries(dt, random())
+
+	log.Printf(`Plotting sample graph:
+	number of points  : %v
+	interval:         : %v
+	width, height (px): %v %v
+	`, len(x), dt, widthPx, heightPx)
 
 	main := chart.TimeSeries{
 		XValues: x,
@@ -96,8 +104,8 @@ func main() {
 	}
 
 	graph := chart.Chart{
-		// Width:  400,
-		// Height: 220,
+		Width:  widthPx,
+		Height: heightPx,
 		XAxis: chart.XAxis{
 			ValueFormatter: chart.TimeHourValueFormatter,
 			GridMajorStyle: chart.Style{
@@ -132,11 +140,14 @@ func main() {
 		},
 	}
 
-	var b bytes.Buffer
 	start := time.Now()
-	graph.Render(chart.PNG, &b)
+	graph.Render(chart.PNG, collector{})
 	log.Println(time.Since(start))
-	if err := os.WriteFile("out.png", b.Bytes(), 0644); err != nil {
-		log.Fatal(err)
-	}
+}
+
+type collector struct{ io.Writer }
+
+func (c collector) SetRGBA(img *image.RGBA) {
+	sz := img.Bounds().Max
+	log.Println("collecting image width, height (px): ", sz.X, sz.Y)
 }
