@@ -142,6 +142,9 @@ func main() {
 
 	start := time.Now()
 	graph.Render(chart.PNG, collector{})
+	// var b bytes.Buffer
+	// graph.Render(chart.PNG, &b)
+	// os.WriteFile("out.png", b.Bytes(), 0644)
 	log.Println(time.Since(start))
 }
 
