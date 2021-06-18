@@ -40,6 +40,11 @@ func main() {
 			r, err := tt.Cleanup(now.Add(-12 * time.Hour))
 			log.Println("del:", time.Since(now))
 			log.Printf("del: %v, %v", r, err)
+		case "scan":
+			now := time.Now()
+			ts, vs, err := tt.Values(0)
+			log.Println("scan:", time.Since(now))
+			log.Println("scan:", len(ts), len(vs), err)
 		}
 	}
 }
@@ -106,7 +111,34 @@ func (tt timeseriesTable) Add(t time.Time, v float32) error {
 }
 
 func (tt timeseriesTable) Values(round time.Duration) ([]time.Time, []float32, error) {
-	return nil, nil, fmt.Errorf("not implemented")
+	const stmt = `
+select
+	cast(30*round(timestamp/30) as integer) as timestamp_bucket,
+	avg(value) as avg_value
+from test_tt
+group by timestamp_bucket
+order by timestamp_bucket`
+	rows, err := tt.db.Query(stmt)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+	var (
+		ts   []time.Time
+		vals []float32
+	)
+	for rows.Next() {
+		var (
+			t int64
+			v float32
+		)
+		if err := rows.Scan(&t, &v); err != nil {
+			return nil, nil, err
+		}
+		ts = append(ts, time.Unix(t, 0))
+		vals = append(vals, v)
+	}
+	return ts, vals, nil
 }
 
 func (tt timeseriesTable) Cleanup(before time.Time) (int, error) {
