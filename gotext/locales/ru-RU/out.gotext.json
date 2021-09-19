@@ -7,32 +7,30 @@
             "translation": "Сопротивление"
         },
         {
-            "id": "Resistivity min: {X}",
-            "message": "Resistivity min: {X}",
-            "translation": "Мин. сопротивление: {X}",
+            "id": "Resistivity min: {Number}",
+            "message": "Resistivity min: {Number}",
+            "translation": "Мин. сопр.: {Number}",
             "placeholders": [
                 {
-                    "id": "X",
+                    "id": "Number",
                     "string": "%.3[1]f",
-                    "type": "float64",
+                    "type": "",
                     "underlyingType": "float64",
-                    "argNum": 1,
-                    "expr": "x"
+                    "argNum": 1
                 }
             ]
         },
         {
-            "id": "Resistivity max: {X}",
-            "message": "Resistivity max: {X}",
-            "translation": "Макс. сопротивление: {X}",
+            "id": "Resist. max: {Number}",
+            "message": "Resist. max: {Number}",
+            "translation": "Макс. сопр.: {Number}",
             "placeholders": [
                 {
-                    "id": "X",
+                    "id": "Number",
                     "string": "%.3[1]f",
-                    "type": "float64",
+                    "type": "",
                     "underlyingType": "float64",
-                    "argNum": 1,
-                    "expr": "x"
+                    "argNum": 1
                 }
             ]
         }

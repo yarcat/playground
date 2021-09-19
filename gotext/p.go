@@ -24,3 +24,7 @@ func (p *P) SetLang(lang string) {
 }
 
 func (p *P) Printer() *message.Printer { return p.p }
+
+func (p *P) Translate(id message.Reference, args ...interface{}) string {
+	return p.p.Sprintf(id, args...)
+}

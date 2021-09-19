@@ -39,24 +39,23 @@ func init() {
 }
 
 var messageKeyToIndex = map[string]int{
+	"Resist. max: %.3f":     2,
 	"Resistivity":           0,
-	"Resistivity max: %.3f": 2,
 	"Resistivity min: %.3f": 1,
 }
 
 var en_GBIndex = []uint32{ // 4 elements
-	0x00000000, 0x0000000c, 0x00000025, 0x0000003e,
+	0x00000000, 0x0000000c, 0x00000025, 0x0000003a,
 } // Size: 40 bytes
 
-const en_GBData string = "" + // Size: 62 bytes
-	"\x02Resistivity\x02Resistivity min: %.3[1]f\x02Resistivity max: %.3[1]f"
+const en_GBData string = "" + // Size: 58 bytes
+	"\x02Resistivity\x02Resistivity min: %.3[1]f\x02Resist. max: %.3[1]f"
 
 var ru_RUIndex = []uint32{ // 4 elements
-	0x00000000, 0x0000001b, 0x00000047, 0x00000075,
+	0x00000000, 0x0000001b, 0x00000036, 0x00000053,
 } // Size: 40 bytes
 
-const ru_RUData string = "" + // Size: 117 bytes
-	"\x02Сопротивление\x02Мин. сопротивление: %.3[1]f\x02Макс. сопротивление:" +
-	" %.3[1]f"
+const ru_RUData string = "" + // Size: 83 bytes
+	"\x02Сопротивление\x02Мин. сопр.: %.3[1]f\x02Макс. сопр.: %.3[1]f"
 
-	// Total table size 259 bytes (0KiB); checksum: A6E8B4CB
+	// Total table size 221 bytes (0KiB); checksum: C12DD4E9

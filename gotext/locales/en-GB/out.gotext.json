@@ -9,35 +9,33 @@
             "fuzzy": true
         },
         {
-            "id": "Resistivity min: {X}",
-            "message": "Resistivity min: {X}",
-            "translation": "Resistivity min: {X}",
+            "id": "Resistivity min: {Number}",
+            "message": "Resistivity min: {Number}",
+            "translation": "Resistivity min: {Number}",
             "translatorComment": "Copied from source.",
             "placeholders": [
                 {
-                    "id": "X",
+                    "id": "Number",
                     "string": "%.3[1]f",
-                    "type": "float64",
+                    "type": "",
                     "underlyingType": "float64",
-                    "argNum": 1,
-                    "expr": "x"
+                    "argNum": 1
                 }
             ],
             "fuzzy": true
         },
         {
-            "id": "Resistivity max: {X}",
-            "message": "Resistivity max: {X}",
-            "translation": "Resistivity max: {X}",
+            "id": "Resist. max: {Number}",
+            "message": "Resist. max: {Number}",
+            "translation": "Resist. max: {Number}",
             "translatorComment": "Copied from source.",
             "placeholders": [
                 {
-                    "id": "X",
+                    "id": "Number",
                     "string": "%.3[1]f",
-                    "type": "float64",
+                    "type": "",
                     "underlyingType": "float64",
-                    "argNum": 1,
-                    "expr": "x"
+                    "argNum": 1
                 }
             ],
             "fuzzy": true
