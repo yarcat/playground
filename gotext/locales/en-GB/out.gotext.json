@@ -1,0 +1,46 @@
+{
+    "language": "en-GB",
+    "messages": [
+        {
+            "id": "Resistivity",
+            "message": "Resistivity",
+            "translation": "Resistivity",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Resistivity min: {X}",
+            "message": "Resistivity min: {X}",
+            "translation": "Resistivity min: {X}",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "X",
+                    "string": "%.3[1]f",
+                    "type": "float64",
+                    "underlyingType": "float64",
+                    "argNum": 1,
+                    "expr": "x"
+                }
+            ],
+            "fuzzy": true
+        },
+        {
+            "id": "Resistivity max: {X}",
+            "message": "Resistivity max: {X}",
+            "translation": "Resistivity max: {X}",
+            "translatorComment": "Copied from source.",
+            "placeholders": [
+                {
+                    "id": "X",
+                    "string": "%.3[1]f",
+                    "type": "float64",
+                    "underlyingType": "float64",
+                    "argNum": 1,
+                    "expr": "x"
+                }
+            ],
+            "fuzzy": true
+        }
+    ]
+}

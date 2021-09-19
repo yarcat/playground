@@ -1,0 +1,40 @@
+{
+    "language": "ru-RU",
+    "messages": [
+        {
+            "id": "Resistivity",
+            "message": "Resistivity",
+            "translation": "Сопротивление"
+        },
+        {
+            "id": "Resistivity min: {X}",
+            "message": "Resistivity min: {X}",
+            "translation": "Мин. сопротивление: {X}",
+            "placeholders": [
+                {
+                    "id": "X",
+                    "string": "%.3[1]f",
+                    "type": "float64",
+                    "underlyingType": "float64",
+                    "argNum": 1,
+                    "expr": "x"
+                }
+            ]
+        },
+        {
+            "id": "Resistivity max: {X}",
+            "message": "Resistivity max: {X}",
+            "translation": "Макс. сопротивление: {X}",
+            "placeholders": [
+                {
+                    "id": "X",
+                    "string": "%.3[1]f",
+                    "type": "float64",
+                    "underlyingType": "float64",
+                    "argNum": 1,
+                    "expr": "x"
+                }
+            ]
+        }
+    ]
+}
