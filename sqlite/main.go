@@ -14,7 +14,8 @@ import (
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	db, err := sql.Open("sqlite3", "./foo.db")
+	const sqlFile = "file:foo.db?cache=shared&timeout=5000"
+	db, err := sql.Open("sqlite3", sqlFile)
 	if err != nil {
 		log.Fatalln("open:", err)
 	}
@@ -32,9 +33,30 @@ func main() {
 	for _, cmd := range os.Args[1:] {
 		switch cmd {
 		case "gen":
-			now := time.Now()
-			transaction(db, func() { generate(tt) })
-			log.Println("gen:", time.Since(now))
+			go func() {
+				db, err := sql.Open("sqlite3", sqlFile+"&mode=ro")
+				if err != nil {
+					log.Fatalf("CNT: OPEN ERR = %v", err)
+				}
+				for {
+					now := time.Now()
+					if cnt, err := count(db, "test_tt"); err != nil {
+						log.Printf("CNT: %s, ERR = %v", time.Since(now), err)
+					} else {
+						log.Printf("CNT: %s, %v", time.Since(now), cnt)
+					}
+					time.Sleep(10 * time.Second)
+				}
+			}()
+			for {
+				now := time.Now()
+				if err := generate(tt); err != nil {
+					log.Printf("GEN: %s, ERR = %v", time.Since(now), err)
+				} else {
+					log.Printf("GEN: %s", time.Since(now))
+				}
+				time.Sleep(100 * time.Millisecond)
+			}
 		case "del":
 			now := time.Now()
 			r, err := tt.Cleanup(now.Add(-12 * time.Hour))
@@ -49,37 +71,51 @@ func main() {
 	}
 }
 
-func transaction(db *sql.DB, f func()) {
-	if _, err := db.Exec("BEGIN"); err != nil {
-		log.Fatalln("begin:", err)
+const countStmt stmt = "SELECT COUNT(*) FROM %s"
+
+func count(db *sql.DB, table string) (int64, error) {
+	r := db.QueryRow(countStmt.For(table))
+	var s int64
+	err := r.Err()
+	if err == nil {
+		err = r.Scan(&s)
 	}
-	f()
-	if _, err := db.Exec("COMMIT"); err != nil {
-		log.Fatalln("commit:", err)
-	}
+	return s, err
 }
 
-func generate(tt timeseriesTable) {
+func generate(tt timeseriesTable) error {
 	now := time.Now()
-	for t := now.Add(-24 * time.Hour); now.After(t); t = t.Add(time.Second) {
-		if err := tt.Add(t, rand.Float32()); err != nil {
-			log.Fatal(err)
-		}
+	var data []TimeValue
+	for t := 1; t <= 30; t++ {
+		data = append(data, TimeValue{t, now, rand.Float32()})
 	}
+	return tt.AddBatch(data)
+}
+
+// func generate(tt timeseriesTable) {
+// 	now := time.Now()
+// 	var data []TimeValue
+// 	for t := now.Add(-24 * time.Hour); now.After(t); t = t.Add(time.Second) {
+// 		data = append(data, TimeValue{t, rand.Float32()})
+// 	}
+// 	if err := tt.AddBatch(data); err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
+
+type TimeValue struct {
+	Typ int
+	T   time.Time
+	V   float32
 }
 
 type timeseriesTable struct {
-	name     string
-	db       *sql.DB
-	add, del *sql.Stmt
+	name string
+	db   *sql.DB
+	del  *sql.Stmt
 }
 
 func newTimeseriesTable(db *sql.DB, name string) (timeseriesTable, error) {
-	const addStmt = `INSERT INTO %s (timestamp, value) VALUES (?, ?)`
-	add, err := db.Prepare(fmt.Sprintf(addStmt, name))
-	if err != nil {
-		return timeseriesTable{}, err
-	}
 	const delStmt = `DELETE FROM %s WHERE timestamp < ?`
 	del, err := db.Prepare(fmt.Sprintf(delStmt, name))
 	if err != nil {
@@ -88,26 +124,45 @@ func newTimeseriesTable(db *sql.DB, name string) (timeseriesTable, error) {
 	return timeseriesTable{
 		name: name,
 		db:   db,
-		add:  add,
 		del:  del,
 	}, nil
 }
 
 func createTimeseriesTable(db *sql.DB, name string) error {
-	const createStmt = `CREATE TABLE IF NOT EXISTS %v (timestamp DATETIME, value REAL)`
+	const createStmt = `CREATE TABLE IF NOT EXISTS %v (row_type INTEGER, timestamp DATETIME, value REAL)`
 	if _, err := db.Exec(fmt.Sprintf(createStmt, name), name); err != nil {
 		return err
 	}
-	const indexStmt = `CREATE INDEX IF NOT EXISTS %[1]s_timestamp ON %[1]s(timestamp)`
+	const indexStmt = `CREATE INDEX IF NOT EXISTS %[1]s_timestamp ON %[1]s(row_type, timestamp)`
 	if _, err := db.Exec(fmt.Sprintf(indexStmt, name), name); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (tt timeseriesTable) Add(t time.Time, v float32) error {
-	_, err := tt.add.Exec(t.UTC().Unix(), v)
-	return err
+type stmt string
+
+func (s stmt) For(tableName string) string { return fmt.Sprintf(string(s), tableName) }
+
+const insertStmt stmt = "INSERT INTO `%s` (row_type, timestamp, value) VALUES (?, ?, ?)"
+
+func (tt timeseriesTable) AddBatch(tv []TimeValue) error {
+	tx, err := tt.db.Begin()
+	if err != nil {
+		return err
+	}
+	stmt, err := tx.Prepare(insertStmt.For(tt.name))
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	for i := range tv {
+		if _, err := stmt.Exec(tv[i].Typ, tv[i].T, tv[i].V); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 func (tt timeseriesTable) Values(round time.Duration) ([]time.Time, []float32, error) {
