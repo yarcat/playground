@@ -1,0 +1,15 @@
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/recoilme/sniper v0.3.0 h1:uf+xX1MtJMJsevUvNMkIWXHeDuJuyvXTd1KwbuB269I=
+github.com/recoilme/sniper v0.3.0/go.mod h1:Mnt1ADFceOfZAaeZPgwEsnJy1nhhHX2paVZMt7Bu0rk=
+github.com/recoilme/sortedset v0.0.0-20200825100557-fdc6fff0bc87 h1:WKeK1vEaQllmIkb9ik8aZ7VP5k/xDf0O/bnnt9uwuYc=
+github.com/recoilme/sortedset v0.0.0-20200825100557-fdc6fff0bc87/go.mod h1:YB55h6bCtRPPhCT4AWwAwKtKBk7xP4b9cZgUMnsgpMo=
+github.com/spaolacci/murmur3 v1.1.0 h1:7c1g84S4BPRrfL5Xrdp6fOJ206sU9y293DDHaoy0bLI=
+github.com/spaolacci/murmur3 v1.1.0/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/tidwall/interval v0.0.0-20191207210631-da4d74c2f07b h1:wOtDbVMF35oMAbxyn8PxlNHC2btH3QPmqLbUnNZxx2I=
+github.com/tidwall/interval v0.0.0-20191207210631-da4d74c2f07b/go.mod h1:yCPTzmuDmgxwgw9Dlc72ezoLS85dtTY+95smzJ+LNvk=
+github.com/tidwall/lotsa v1.0.1/go.mod h1:X6NiU+4yHA3fE3Puvpnn1XMDrFZrE9JO2/w+UMuqgR8=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
