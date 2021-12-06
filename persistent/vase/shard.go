@@ -21,6 +21,9 @@ func Shards(v *Vase) ShardIterator {
 	done := make(chan struct{}, 1)
 	go func() {
 		defer close(d)
+		if err := v.Flush(); err != nil {
+			log.Printf("failed to flush: %v", err)
+		}
 		for _, f := range files {
 			r, err := v.opts.OpenFile(f)
 			if err != nil {
