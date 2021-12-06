@@ -10,7 +10,7 @@ import (
 
 type Vase struct {
 	m    sync.Mutex
-	w    io.WriteCloser
+	w    *bufWriteCloser
 	dir  string
 	opts options
 }
@@ -51,6 +51,15 @@ func (v *Vase) Put(enc func(io.Writer) error) error {
 	return nil
 }
 
+func (v *Vase) Flush() error {
+	v.m.Lock()
+	defer v.m.Unlock()
+
+	if v.w == nil {
+		return nil
+	}
+	return v.w.Flush()
+}
 func (v *Vase) lazyInit() error {
 	if v.w != nil {
 		return nil
