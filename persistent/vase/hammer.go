@@ -13,6 +13,7 @@ func (h hammer) Every(d time.Duration) (cancel func()) {
 	done := make(chan struct{}, 1)
 	go func() {
 		t := time.NewTicker(d)
+		defer t.Stop()
 		for {
 			select {
 			case <-done:
