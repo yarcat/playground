@@ -1,6 +1,8 @@
 package vase
 
-import "bufio"
+import (
+	"bufio"
+)
 
 type bufWriteCloser struct {
 	*bufio.Writer
@@ -20,6 +22,4 @@ type bufReadCloser struct {
 	close func() error
 }
 
-func (bwc *bufReadCloser) Close() error {
-	return bwc.close()
-}
+func (bwc *bufReadCloser) Close() error { return bwc.close() }

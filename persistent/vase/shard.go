@@ -14,7 +14,7 @@ import (
 func Shards(v *Vase) ShardIterator {
 	files, err := v.opts.Glob(path.Join(v.dir, "*"))
 	if err != nil {
-		log.Printf("shards fail to glob %s: %v", v.dir, err)
+		log.Printf("(ignored) shards fail to glob %s: %v", v.dir, err)
 	}
 	sort.Strings(files)
 	d := make(chan shardData, 10)
@@ -22,12 +22,12 @@ func Shards(v *Vase) ShardIterator {
 	go func() {
 		defer close(d)
 		if err := v.Flush(); err != nil {
-			log.Printf("failed to flush: %v", err)
+			log.Printf("(ignored) failed to flush: %v", err)
 		}
 		for _, f := range files {
 			r, err := v.opts.OpenFile(f)
 			if err != nil {
-				log.Printf("unable to open shard: %v", err)
+				log.Printf("(ignored) unable to open shard: %v", err)
 				continue
 			}
 			select {
@@ -59,7 +59,7 @@ func (s *ShardIterator) Close() error {
 	}
 	for d := range s.r {
 		if err := d.R.Close(); err != nil {
-			log.Printf("error closing %s: %v", d.Name, err)
+			log.Printf("(ignored) error closing %s: %v", d.Name, err)
 		}
 	}
 	return nil
@@ -80,7 +80,7 @@ func (s *ShardIterator) closeAndForget() {
 		return
 	}
 	if err := s.cur.R.Close(); err != nil {
-		log.Printf("error closing %s: %v", s.cur.Name, err)
+		log.Printf("(ignored) error closing %s: %v", s.cur.Name, err)
 		s.cur.R, s.cur.Name = nil, ""
 	}
 }
