@@ -71,16 +71,3 @@ func (v *Vase) lazyInit() error {
 	v.w = &bufWriteCloser{bufio.NewWriter(w), w.Close}
 	return nil
 }
-
-type bufWriteCloser struct {
-	*bufio.Writer
-	close func() error
-}
-
-func (bwc *bufWriteCloser) Close() error {
-	if err := bwc.Flush(); err != nil {
-		bwc.close()
-		return err
-	}
-	return bwc.close()
-}

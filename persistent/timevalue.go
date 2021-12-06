@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/binary"
 	"io"
-	"math"
 	"time"
 )
 
@@ -22,16 +21,23 @@ type TimeValue struct {
 	V    float32
 }
 
+type timeValueRepr struct {
+	Type uint16
+	MSec int64
+	Val  float32
+}
+
 func EncodeTypeValue(w io.Writer, order binary.ByteOrder, tv TimeValue) error {
-	var err error
-	if err == nil {
-		err = binary.Write(w, order, uint16(tv.Type))
+	return binary.Write(w, order, timeValueRepr{
+		uint16(tv.Type), tv.T.UTC().UnixMilli(), tv.V,
+	})
+}
+
+func DecodeTypeValue(r io.Reader, order binary.ByteOrder, tv *TimeValue) error {
+	var tvr timeValueRepr
+	if err := binary.Read(r, order, &tvr); err != nil {
+		return err
 	}
-	if err == nil {
-		err = binary.Write(w, order, tv.T.UTC().UnixMilli())
-	}
-	if err == nil {
-		err = binary.Write(w, order, math.Float32bits(tv.V))
-	}
-	return err
+	*tv = TimeValue{Type(tvr.Type), time.UnixMilli(tvr.MSec), tv.V}
+	return nil
 }
