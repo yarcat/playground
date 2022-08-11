@@ -27,43 +27,43 @@ func benchmarkSort(b *testing.B, sort func([]int)) {
 func BenchmarkSort(b *testing.B)       { benchmarkSort(b, Sort[int]) }
 func BenchmarkSortBubble(b *testing.B) { benchmarkSort(b, SortBubble[int]) }
 
+func min(a, b int) int {
+	if b < a {
+		return b
+	}
+	return a
+}
+
 func Sort[T constraints.Ordered](s []T) {
 	x := make([]T, len(s))
-	slices, from, to := [2][]T{s, x}, 0, 1
-	for seg := 1; seg < len(s); seg *= 2 {
-		out := 0
-		for out < len(s) {
-			a, b := out, out+seg
-			A, B := seg, seg
-			if out+A >= len(s) {
-				A, B = len(s)-out, 0
-			} else if out+A+B > len(s) {
-				B = len(s) - A - out
-			}
-			for A > 0 && B > 0 {
-				if slices[from][a] <= slices[from][b] {
-					slices[to][out] = slices[from][a]
-					a++
-					A--
-				} else {
-					slices[to][out] = slices[from][b]
-					b++
-					B--
-				}
-				out++
-			}
-			if A > 0 {
-				copy(slices[to][out:], slices[from][a:a+A])
-				out += A
+	from, to := &s, &x
+	merge := func(seg, out int) int {
+		a, b := out, out+seg
+		A, B := min(seg, len(s)-a), min(seg, len(s)-b)
+		for ; A > 0 && B > 0; out++ {
+			if (*from)[a] <= (*from)[b] {
+				(*to)[out] = (*from)[a]
+				a, A = a+1, A-1
 			} else {
-				copy(slices[to][out:], slices[from][b:b+B])
-				out += B
+				(*to)[out] = (*from)[b]
+				b, B = b+1, B-1
 			}
+		}
+		if A > 0 {
+			out += copy((*to)[out:], (*from)[a:a+A])
+		} else {
+			out += copy((*to)[out:], (*from)[b:b+B])
+		}
+		return out
+	}
+	for seg := 1; seg < len(s); seg *= 2 {
+		for out := 0; out < len(s); {
+			out = merge(seg, out)
 		}
 		from, to = to, from
 	}
-	if from == 1 {
-		copy(s, slices[1])
+	if from == &x {
+		copy(s, *from)
 	}
 }
 
