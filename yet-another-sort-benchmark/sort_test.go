@@ -77,19 +77,15 @@ func Sort[T constraints.Ordered](s []T) {
 		A, B := min(seg, len(s)-a), min(seg, len(s)-b)
 		for ; A > 0 && B > 0; out++ {
 			if from[a] <= from[b] {
-				to[out] = from[a]
-				a, A = a+1, A-1
+				to[out], a, A = from[a], a+1, A-1
 			} else {
-				to[out] = from[b]
-				b, B = b+1, B-1
+				to[out], b, B = from[b], b+1, B-1
 			}
 		}
 		if A > 0 {
-			out += copy(to[out:], from[a:a+A])
-		} else {
-			out += copy(to[out:], from[b:b+B])
+			return out + copy(to[out:], from[a:a+A])
 		}
-		return out
+		return out + copy(to[out:], from[b:b+B])
 	}
 	for seg := 1; seg < len(s); seg *= 2 {
 		for out := 0; out < len(s); {
