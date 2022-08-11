@@ -36,23 +36,23 @@ func min(a, b int) int {
 
 func Sort[T constraints.Ordered](s []T) {
 	x := make([]T, len(s))
-	from, to := &s, &x
+	from, to, fromS := s, x, true
 	merge := func(seg, out int) int {
 		a, b := out, out+seg
 		A, B := min(seg, len(s)-a), min(seg, len(s)-b)
 		for ; A > 0 && B > 0; out++ {
-			if (*from)[a] <= (*from)[b] {
-				(*to)[out] = (*from)[a]
+			if from[a] <= from[b] {
+				to[out] = from[a]
 				a, A = a+1, A-1
 			} else {
-				(*to)[out] = (*from)[b]
+				to[out] = from[b]
 				b, B = b+1, B-1
 			}
 		}
 		if A > 0 {
-			out += copy((*to)[out:], (*from)[a:a+A])
+			out += copy(to[out:], from[a:a+A])
 		} else {
-			out += copy((*to)[out:], (*from)[b:b+B])
+			out += copy(to[out:], from[b:b+B])
 		}
 		return out
 	}
@@ -60,10 +60,10 @@ func Sort[T constraints.Ordered](s []T) {
 		for out := 0; out < len(s); {
 			out = merge(seg, out)
 		}
-		from, to = to, from
+		from, to, fromS = to, from, !fromS
 	}
-	if from == &x {
-		copy(s, *from)
+	if fromS {
+		copy(s, to)
 	}
 }
 
