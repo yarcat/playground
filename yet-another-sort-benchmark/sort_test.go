@@ -72,24 +72,24 @@ func min(a, b int) int {
 
 func Sort[T constraints.Ordered](s []T) {
 	from, to, fromS := s, make([]T, len(s)), true
-	merge := func(seg, out int) int {
-		a, b := out, out+seg
-		A, B := min(seg, len(s)-a), min(seg, len(s)-b)
-		for ; A > 0 && B > 0; out++ {
+	merge := func(segLen, tailIdx int) int {
+		a, b := tailIdx, tailIdx+segLen
+		A, B := min(segLen, len(s)-a), min(segLen, len(s)-b)
+		for ; A > 0 && B > 0; tailIdx++ {
 			if from[a] <= from[b] {
-				to[out], a, A = from[a], a+1, A-1
+				to[tailIdx], a, A = from[a], a+1, A-1
 			} else {
-				to[out], b, B = from[b], b+1, B-1
+				to[tailIdx], b, B = from[b], b+1, B-1
 			}
 		}
 		if A > 0 {
-			return out + copy(to[out:], from[a:a+A])
+			return tailIdx + copy(to[tailIdx:], from[a:a+A])
 		}
-		return out + copy(to[out:], from[b:b+B])
+		return tailIdx + copy(to[tailIdx:], from[b:b+B])
 	}
-	for seg := 1; seg < len(s); seg *= 2 {
-		for out := 0; out < len(s); {
-			out = merge(seg, out)
+	for segLen := 1; segLen < len(s); segLen *= 2 {
+		for tailIdx := 0; tailIdx < len(s); {
+			tailIdx = merge(segLen, tailIdx)
 		}
 		from, to, fromS = to, from, !fromS
 	}
