@@ -29,6 +29,7 @@ func BenchmarkSort(b *testing.B)             { benchmarkSort(b, Sort[int]) }
 func BenchmarkSortBubble(b *testing.B)       { benchmarkSort(b, SortBubble[int]) }
 func BenchmarkSortInsert(b *testing.B)       { benchmarkSort(b, SortInsert[int]) }
 func BenchmarkSortInsertBisect(b *testing.B) { benchmarkSort(b, SortInsertBisect[int]) }
+func BenchmarkSortQuick(b *testing.B)        { benchmarkSort(b, SortQuick[int]) }
 
 func testSort(t *testing.T, sort func([]int)) {
 	for _, tc := range []struct {
@@ -47,6 +48,8 @@ func testSort(t *testing.T, sort func([]int)) {
 		{"ten_random", []int{4, 3, 7, 1, 0, 5, 2, 6, 9, 8}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
 		{"ten_sorted", []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
 		{"ten_reversed", []int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{"same", []int{123, 123, 123}, []int{123, 123, 123}},
+		{"repeated", []int{123, 1, 123, 1, 123, 1}, []int{1, 1, 1, 123, 123, 123}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var got []int
@@ -66,6 +69,7 @@ func TestSort(t *testing.T)             { testSort(t, Sort[int]) }
 func TestSortBubble(t *testing.T)       { testSort(t, SortBubble[int]) }
 func TestSortInsert(t *testing.T)       { testSort(t, SortInsert[int]) }
 func TestSortInsertBisect(t *testing.T) { testSort(t, SortInsertBisect[int]) }
+func TestSortQuick(t *testing.T)        { testSort(t, SortQuick[int]) }
 
 func min(a, b int) int {
 	if b < a {
@@ -148,4 +152,41 @@ func SortInsertBisect[T constraints.Ordered](s []T) {
 		copy(s[j+1:], s[j:i])
 		s[j] = x
 	}
+}
+
+func partitionForQuick[T constraints.Ordered](s []T, piv T) (left, right []T) {
+	i, j := 0, len(s)-1
+	for i < j {
+		for s[i] < piv {
+			i++
+		}
+		for s[j] > piv {
+			j--
+		}
+		if s[j] == piv {
+			if s[i] > piv {
+				s[i], s[j] = s[j], s[i]
+			}
+			j--
+		} else {
+			s[i], s[j] = s[j], s[i]
+			i, j = i+1, j-1
+		}
+	}
+	for i < len(s) && s[i] == piv {
+		i++
+	}
+	for j >= 0 && s[j] == piv {
+		j--
+	}
+	return s[:j+1], s[i:]
+}
+
+func SortQuick[T constraints.Ordered](s []T) {
+	if len(s) <= 1 {
+		return
+	}
+	left, right := partitionForQuick(s, s[len(s)/2])
+	SortQuick(left)
+	SortQuick(right)
 }
