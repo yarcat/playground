@@ -68,6 +68,8 @@ func testSort(t *testing.T, sort func([]int)) {
 		{"ten_reversed", []int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
 		{"same", []int{123, 123, 123}, []int{123, 123, 123}},
 		{"repeated", []int{123, 1, 123, 1, 123, 1}, []int{1, 1, 1, 123, 123, 123}},
+		{"negative", []int{-1}, []int{-1}},
+		{"mixed", []int{3, -3, 1, -1, -5, 5}, []int{-5, -3, -1, 1, 3, 5}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var got []int
