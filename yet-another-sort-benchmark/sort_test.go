@@ -8,6 +8,18 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+var sortFns = []struct {
+	name string
+	f    func([]int)
+}{
+	{"merge", SortMerge[int]},
+	{"bubble", SortBubble[int]},
+	{"insert", SortInsert[int]},
+	{"insert2", SortInsert2[int]},
+	{"insert bisect", SortInsertBisect[int]},
+	{"quick", SortQuick[int]},
+}
+
 const minRng, maxRng = -10_000, 10_000
 
 var s []int
@@ -32,17 +44,7 @@ func benchmarkSort(b *testing.B, sort func([]int)) {
 }
 
 func BenchmarkSort(b *testing.B) {
-	for _, bc := range []struct {
-		name string
-		f    func([]int)
-	}{
-		{"merge", SortMerge[int]},
-		{"bubble", SortBubble[int]},
-		{"insert", SortInsert[int]},
-		{"insert2", SortInsert2[int]},
-		{"insert bisect", SortInsertBisect[int]},
-		{"quick", SortQuick[int]},
-	} {
+	for _, bc := range sortFns {
 		b.Run(bc.name, func(b *testing.B) { benchmarkSort(b, bc.f) })
 	}
 }
@@ -81,12 +83,11 @@ func testSort(t *testing.T, sort func([]int)) {
 	}
 }
 
-func TestSort(t *testing.T)             { testSort(t, SortMerge[int]) }
-func TestSortBubble(t *testing.T)       { testSort(t, SortBubble[int]) }
-func TestSortInsert(t *testing.T)       { testSort(t, SortInsert[int]) }
-func TestSortInsertBisect(t *testing.T) { testSort(t, SortInsertBisect[int]) }
-func TestSortInsert2(t *testing.T)      { testSort(t, SortInsert2[int]) }
-func TestSortQuick(t *testing.T)        { testSort(t, SortQuick[int]) }
+func TestSort(t *testing.T) {
+	for _, tc := range sortFns {
+		t.Run(tc.name, func(t *testing.T) { testSort(t, tc.f) })
+	}
+}
 
 func min(a, b int) int {
 	if b < a {
