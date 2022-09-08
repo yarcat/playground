@@ -28,6 +28,7 @@ func benchmarkSort(b *testing.B, sort func([]int)) {
 func BenchmarkSort(b *testing.B)             { benchmarkSort(b, Sort[int]) }
 func BenchmarkSortBubble(b *testing.B)       { benchmarkSort(b, SortBubble[int]) }
 func BenchmarkSortInsert(b *testing.B)       { benchmarkSort(b, SortInsert[int]) }
+func BenchmarkSortInsert2(b *testing.B)      { benchmarkSort(b, SortInsert2[int]) }
 func BenchmarkSortInsertBisect(b *testing.B) { benchmarkSort(b, SortInsertBisect[int]) }
 func BenchmarkSortQuick(b *testing.B)        { benchmarkSort(b, SortQuick[int]) }
 
@@ -69,6 +70,7 @@ func TestSort(t *testing.T)             { testSort(t, Sort[int]) }
 func TestSortBubble(t *testing.T)       { testSort(t, SortBubble[int]) }
 func TestSortInsert(t *testing.T)       { testSort(t, SortInsert[int]) }
 func TestSortInsertBisect(t *testing.T) { testSort(t, SortInsertBisect[int]) }
+func TestSortInsert2(t *testing.T)      { testSort(t, SortInsert2[int]) }
 func TestSortQuick(t *testing.T)        { testSort(t, SortQuick[int]) }
 
 func min(a, b int) int {
@@ -151,6 +153,16 @@ func SortInsertBisect[T constraints.Ordered](s []T) {
 		}
 		copy(s[j+1:], s[j:i])
 		s[j] = x
+	}
+}
+
+func SortInsert2[T constraints.Ordered](s []T) {
+	for i := 1; i < len(s); i++ {
+		n, j := s[i], i-1
+		for ; j >= 0 && s[j] > n; j-- {
+			s[j+1] = s[j]
+		}
+		s[j+1] = n
 	}
 }
 
