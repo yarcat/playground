@@ -1,24 +1,34 @@
 package sort_test
 
 import (
+	"math/bits"
 	"math/rand"
 	"reflect"
 	"testing"
+	"unsafe"
 
 	"golang.org/x/exp/constraints"
 )
 
-var sortFns = []struct {
-	name string
-	f    func([]int)
-}{
-	{"merge", SortMerge[int]},
-	{"bubble", SortBubble[int]},
-	{"insert", SortInsert[int]},
-	{"insert2", SortInsert2[int]},
-	{"insert bisect", SortInsertBisect[int]},
-	{"quick", SortQuick[int]},
-}
+var (
+	sortFns = []struct {
+		name string
+		f    func([]int)
+	}{
+		{"merge", SortMerge[int]},
+		{"bubble", SortBubble[int]},
+		{"insert", SortInsert[int]},
+		{"insert2", SortInsert2[int]},
+		{"insert bisect", SortInsertBisect[int]},
+		{"quick", SortQuick[int]},
+	}
+	uintSortFns = []struct {
+		name string
+		f    func([]uint)
+	}{
+		{"radix count", SortRadixCount},
+	}
+)
 
 const minRng, maxRng = -10_000, 10_000
 
@@ -32,49 +42,58 @@ func init() {
 	}
 }
 
-func benchmarkSort(b *testing.B, sort func([]int)) {
-	s2 := make([]int, len(s))
+func inputAs[T int | uint]() []T { return *(*[]T)(unsafe.Pointer(&s)) }
+
+func benchmarkSort[T int | uint](b *testing.B, sort func([]T)) {
+	s2 := make([]T, len(s))
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
-		copy(s2, s)
+		copy(s2, inputAs[T]())
 		b.StartTimer()
 		sort(s2)
 	}
 }
 
-func BenchmarkSort(b *testing.B) {
+func BenchmarkIntSort(b *testing.B) {
 	for _, bc := range sortFns {
 		b.Run(bc.name, func(b *testing.B) { benchmarkSort(b, bc.f) })
 	}
 }
 
-func testSort(t *testing.T, sort func([]int)) {
+func BenchmarkUintSort(b *testing.B) {
+	for _, bc := range uintSortFns {
+		b.Run(bc.name, func(b *testing.B) { benchmarkSort(b, bc.f) })
+	}
+}
+
+func testSort[T int | uint](t *testing.T, sort func([]T)) {
 	for _, tc := range []struct {
 		name        string
-		input, want []int
+		input, want []T
 	}{
 		{"nil", nil, nil},
-		{"empty", []int{}, []int{}},
-		{"single", []int{123}, []int{123}},
-		{"two_sorted", []int{1, 2}, []int{1, 2}},
-		{"two_reversed", []int{2, 1}, []int{1, 2}},
-		{"three_random", []int{2, 3, 1}, []int{1, 2, 3}},
-		{"three_sorted", []int{1, 2, 3}, []int{1, 2, 3}},
-		{"three_reversed", []int{3, 2, 1}, []int{1, 2, 3}},
-		{"four_reversed", []int{4, 3, 2, 1}, []int{1, 2, 3, 4}},
-		{"ten_random", []int{4, 3, 7, 1, 0, 5, 2, 6, 9, 8}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
-		{"ten_sorted", []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
-		{"ten_reversed", []int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
-		{"same", []int{123, 123, 123}, []int{123, 123, 123}},
-		{"repeated", []int{123, 1, 123, 1, 123, 1}, []int{1, 1, 1, 123, 123, 123}},
-		{"negative", []int{-1}, []int{-1}},
-		{"mixed", []int{3, -3, 1, -1, -5, 5}, []int{-5, -3, -1, 1, 3, 5}},
+		{"empty", []T{}, []T{}},
+		{"single", []T{123}, []T{123}},
+		{"two_sorted", []T{1, 2}, []T{1, 2}},
+		{"two_reversed", []T{2, 1}, []T{1, 2}},
+		{"three_random", []T{2, 3, 1}, []T{1, 2, 3}},
+		{"three_sorted", []T{1, 2, 3}, []T{1, 2, 3}},
+		{"three_reversed", []T{3, 2, 1}, []T{1, 2, 3}},
+		{"four_reversed", []T{4, 3, 2, 1}, []T{1, 2, 3, 4}},
+		{"ten_random", []T{4, 3, 7, 1, 0, 5, 2, 6, 9, 8}, []T{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{"ten_sorted", []T{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []T{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{"ten_reversed", []T{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}, []T{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{"same", []T{123, 123, 123}, []T{123, 123, 123}},
+		{"repeated", []T{123, 1, 123, 1, 123, 1}, []T{1, 1, 1, 123, 123, 123}},
+		// TODO(yarcat): Enable for int.
+		// {"negative", []T{-1}, []T{-1}},
+		// {"mixed", []T{3, -3, 1, -1, -5, 5}, []T{-5, -3, -1, 1, 3, 5}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			var got []int
+			var got []T
 			if tc.input != nil {
-				got = make([]int, len(tc.input))
+				got = make([]T, len(tc.input))
 				copy(got, tc.input)
 			}
 			sort(got)
@@ -85,8 +104,14 @@ func testSort(t *testing.T, sort func([]int)) {
 	}
 }
 
-func TestSort(t *testing.T) {
+func TestIntSort(t *testing.T) {
 	for _, tc := range sortFns {
+		t.Run(tc.name, func(t *testing.T) { testSort(t, tc.f) })
+	}
+}
+
+func TestUintSort(t *testing.T) {
+	for _, tc := range uintSortFns {
 		t.Run(tc.name, func(t *testing.T) { testSort(t, tc.f) })
 	}
 }
@@ -219,4 +244,33 @@ func SortQuick[T constraints.Ordered](s []T) {
 	left, right := partitionForQuick(s, s[len(s)/2])
 	SortQuick(left)
 	SortQuick(right)
+}
+
+const IntSizeBytes = bits.UintSize / 8
+
+func SortRadixCount(s []uint) {
+	if len(s) <= 1 {
+		return
+	}
+	fromS, into := true, make([]uint, len(s))
+	for i, shift := IntSizeBytes, 0; i > 0; i, shift = i-1, shift+8 {
+		cnt := make([]int, 256)
+		for _, v := range s {
+			cnt[byte(v>>shift)]++
+		}
+		for j := range cnt {
+			if j > 0 {
+				cnt[j] += cnt[j-1]
+			}
+		}
+		for j := len(s) - 1; j >= 0; j-- {
+			rad := byte(s[j] >> shift)
+			cnt[rad]--
+			into[cnt[rad]] = s[j]
+		}
+		fromS, s, into = !fromS, into, s
+	}
+	if !fromS {
+		copy(s, into)
+	}
 }
