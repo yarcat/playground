@@ -8,13 +8,15 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+const minRng, maxRng = -10_000, 10_000
+
 var s []int
 
 func init() {
 	// rand.Seed(time.Now().UnixMicro())
 	s = make([]int, 10_000)
 	for i := range s {
-		s[i] = rand.Intn(10_000)
+		s[i] = rand.Intn(maxRng-minRng+1) + minRng
 	}
 }
 
@@ -25,12 +27,22 @@ func benchmarkSort(b *testing.B, sort func([]int)) {
 		sort(s2)
 	}
 }
-func BenchmarkSort(b *testing.B)             { benchmarkSort(b, Sort[int]) }
-func BenchmarkSortBubble(b *testing.B)       { benchmarkSort(b, SortBubble[int]) }
-func BenchmarkSortInsert(b *testing.B)       { benchmarkSort(b, SortInsert[int]) }
-func BenchmarkSortInsert2(b *testing.B)      { benchmarkSort(b, SortInsert2[int]) }
-func BenchmarkSortInsertBisect(b *testing.B) { benchmarkSort(b, SortInsertBisect[int]) }
-func BenchmarkSortQuick(b *testing.B)        { benchmarkSort(b, SortQuick[int]) }
+
+func BenchmarkSort(b *testing.B) {
+	for _, bc := range []struct {
+		name string
+		f    func([]int)
+	}{
+		{"merge", SortMerge[int]},
+		{"bubble", SortBubble[int]},
+		{"insert", SortInsert[int]},
+		{"insert2", SortInsert2[int]},
+		{"insert bisect", SortInsertBisect[int]},
+		{"quick", SortQuick[int]},
+	} {
+		b.Run(bc.name, func(b *testing.B) { benchmarkSort(b, bc.f) })
+	}
+}
 
 func testSort(t *testing.T, sort func([]int)) {
 	for _, tc := range []struct {
@@ -66,7 +78,7 @@ func testSort(t *testing.T, sort func([]int)) {
 	}
 }
 
-func TestSort(t *testing.T)             { testSort(t, Sort[int]) }
+func TestSort(t *testing.T)             { testSort(t, SortMerge[int]) }
 func TestSortBubble(t *testing.T)       { testSort(t, SortBubble[int]) }
 func TestSortInsert(t *testing.T)       { testSort(t, SortInsert[int]) }
 func TestSortInsertBisect(t *testing.T) { testSort(t, SortInsertBisect[int]) }
@@ -80,7 +92,7 @@ func min(a, b int) int {
 	return a
 }
 
-func Sort[T constraints.Ordered](s []T) {
+func SortMerge[T constraints.Ordered](s []T) {
 	from, to, fromS := s, make([]T, len(s)), true
 	merge := func(segLen, tailIdx int) int {
 		a, b := tailIdx, tailIdx+segLen
