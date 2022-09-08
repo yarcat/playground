@@ -22,8 +22,11 @@ func init() {
 
 func benchmarkSort(b *testing.B, sort func([]int)) {
 	s2 := make([]int, len(s))
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
+		b.StopTimer()
 		copy(s2, s)
+		b.StartTimer()
 		sort(s2)
 	}
 }
