@@ -4,6 +4,7 @@ import (
 	"math/bits"
 	"math/rand"
 	"reflect"
+	"sort"
 	"testing"
 	"unsafe"
 
@@ -15,6 +16,7 @@ var (
 		name string
 		f    func([]int)
 	}{
+		{"builtin", sort.Ints},
 		{"merge", SortMerge[int]},
 		{"bubble", SortBubble[int]},
 		{"insert", SortInsert[int]},
