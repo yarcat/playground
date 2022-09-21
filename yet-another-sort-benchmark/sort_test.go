@@ -23,6 +23,7 @@ var (
 		{"insert2", SortInsert2[int]},
 		{"insert bisect", SortInsertBisect[int]},
 		{"quick", SortQuick[int]},
+		{"quick classic", SortClassic},
 	}
 	uintSortFns = []struct {
 		name string
@@ -275,4 +276,34 @@ func SortRadixCount(s []uint) {
 	if !fromS {
 		copy(s, into)
 	}
+}
+
+func SortClassic(s []int) {
+	partition := func(l, r int) int {
+		p := s[(l+r)/2]
+		for {
+			for s[l] < p {
+				l++
+			}
+			for s[r] > p {
+				r--
+			}
+			if l >= r {
+				return r
+			}
+			s[l], s[r] = s[r], s[l]
+			l, r = l+1, r-1
+		}
+	}
+
+	var sort func(int, int)
+	sort = func(l, r int) {
+		if r-l < 1 {
+			return
+		}
+		p := partition(l, r)
+		sort(l, p)
+		sort(p+1, r)
+	}
+	sort(0, len(s)-1)
 }
