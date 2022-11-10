@@ -8,23 +8,23 @@ after some time. Most probably not reliable at all. But at least we can see
 our expectations clearly.
 
 ```
-$ go test -bench . -benchmem 
-goos: windows
+go test -bench . -benchmem
+goos: linux
 goarch: amd64
 pkg: sort-benchmark
-cpu: Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz
-BenchmarkSort/old_qsort/ordered-8                      8         132012675 ns/op           20000 B/op       1250 allocs/op
-BenchmarkSort/new_qsort/ordered-8                      6         171538533 ns/op           26666 B/op       1666 allocs/op
-BenchmarkSort/old_qsort/random-8                    1100           1093667 ns/op             145 B/op          9 allocs/op
-BenchmarkSort/new_qsort/random-8                    1153           1026220 ns/op             138 B/op          8 allocs/op
-BenchmarkSort/old_qsort/reversed-8                     8         133900512 ns/op           20000 B/op       1250 allocs/op
-BenchmarkSort/new_qsort/reversed-8                     7         151973714 ns/op           22857 B/op       1428 allocs/op
-BenchmarkSort/old_msort/ordered-8                   1118           1038488 ns/op             143 B/op          8 allocs/op
-BenchmarkSort/new_msort/ordered-8                   2212            485322 ns/op              72 B/op          4 allocs/op
-BenchmarkSort/old_msort/random-8                     762           1510275 ns/op             209 B/op         13 allocs/op
-BenchmarkSort/new_msort/random-8                    1023           1090734 ns/op             156 B/op          9 allocs/op
-BenchmarkSort/old_msort/reversed-8                  1117           1040278 ns/op             143 B/op          8 allocs/op
-BenchmarkSort/new_msort/reversed-8                  2398            471350 ns/op              66 B/op          4 allocs/op
+cpu: Intel(R) Celeron(R) CPU N3350 @ 1.10GHz
+BenchmarkSort/ord/old_qsort-2                  2         531386944 ns/op               4 B/op          0 allocs/op
+BenchmarkSort/ord/new_qsort-2                  2         530056282 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/ord/old_msort-2                345           3335615 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/ord/new_msort-2                705           1678797 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rng/old_qsort-2                409           3139043 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rng/new_qsort-2                464           2621409 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rng/old_msort-2                297           4167340 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rng/new_msort-2                405           2916307 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rev/old_qsort-2                  3         483659589 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rev/new_qsort-2                  3         494323130 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rev/old_msort-2                352           3366407 ns/op               0 B/op          0 allocs/op
+BenchmarkSort/rev/new_msort-2                848           1402031 ns/op               0 B/op          0 allocs/op
 PASS
-ok      sort-benchmark  19.511s
+ok      sort-benchmark  26.145s
 ```

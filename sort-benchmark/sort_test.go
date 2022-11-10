@@ -11,7 +11,7 @@ func init() {
 }
 
 var (
-	ordered = count(1_0_000)
+	ordered = count(10_000)
 	random  = shuffled(ordered)
 	rev     = reversed(ordered)
 )
@@ -19,13 +19,13 @@ var (
 func oldAlgo(sort func(list) list) func(*testing.B, []int) {
 	return func(b *testing.B, s []int) {
 		for n := 0; n < b.N; n++ {
+			b.StopTimer()
 			var l list
 			for _, x := range s {
 				l.pushBack(x)
 			}
 			b.StartTimer()
 			sort(l)
-			b.StopTimer()
 		}
 	}
 }
@@ -33,33 +33,37 @@ func oldAlgo(sort func(list) list) func(*testing.B, []int) {
 func newAlgo(sort func(*gennode[int], func(a, b int) bool) *gennode[int]) func(*testing.B, []int) {
 	return func(b *testing.B, ints []int) {
 		for n := 0; n < b.N; n++ {
+			b.StopTimer()
 			l := genlist(ints...)
 			b.StartTimer()
 			sort(l, genless[int])
-			b.StopTimer()
 		}
 	}
 }
 func BenchmarkSort(b *testing.B) {
-	for _, bc := range []struct {
+	genqsort := func(n *gennode[int], less func(a, b int) bool) *gennode[int] {
+		n, _ = genqsort(n, less)
+		return n
+	}
+	for _, data := range []struct {
 		name string
-		f    func(*testing.B, []int)
+		in   []int
 	}{
-		{"old qsort", oldAlgo(qsorted)},
-		{"old msort", oldAlgo(msorted)},
-		{"new qsort", newAlgo(func(n *gennode[int], less func(a, b int) bool) *gennode[int] { n, _ = genqsort(n, less); return n })},
-		{"new msort", newAlgo(genmsort[int])},
+		{"ord", ordered},
+		{"rng", random},
+		{"rev", rev},
 	} {
-		b.Run(bc.name, func(b *testing.B) {
-			for _, data := range []struct {
+		b.Run(data.name, func(b *testing.B) {
+			for _, bc := range []struct {
 				name string
-				in   []int
+				f    func(*testing.B, []int)
 			}{
-				{"ordered", ordered},
-				{"random", random},
-				{"reversed", rev},
+				{"old qsort", oldAlgo(qsorted)},
+				{"new qsort", newAlgo(genqsort)},
+				{"old msort", oldAlgo(msorted)},
+				{"new msort", newAlgo(genmsort[int])},
 			} {
-				b.Run(data.name, func(b *testing.B) { bc.f(b, data.in) })
+				b.Run(bc.name, func(b *testing.B) { bc.f(b, data.in) })
 			}
 		})
 	}
