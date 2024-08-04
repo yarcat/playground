@@ -1,0 +1,54 @@
+<body>
+
+{{with .auth}}
+  <p>Logged in as {{.Email}}</p>
+  <form action="/logout" method="post">
+    <input type="submit" value="Logout">
+  </form>
+{{else}}
+    <div id="login">
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email" value="user@user.user"><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" value="password"><br>
+            <input type="submit" value="Login">
+        </form>
+        <button onclick="showSignup()">Switch to Signup</button>
+
+        <script>
+        function showSignup() {
+            const loginForm = document.getElementById("login");
+            const signupForm = document.getElementById("signup");
+
+            loginForm.style.display = "none";
+            signupForm.style.display = "block";
+        }
+        </script>
+    </div>
+
+    <div id="signup" style="display:none">
+        <h1>Signup</h1>
+        <form action="/signup" method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="user@user.user"><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" value="password"><br>
+            <input type="submit" value="Signup">
+        </form>
+        <button onclick="showLogin()">Switch to Login</button>
+
+        <script>
+        function showLogin() {
+            const loginForm = document.getElementById("login");
+            const signupForm = document.getElementById("signup");
+
+            loginForm.style.display = "block";
+            signupForm.style.display = "none";
+        }
+        </script>
+    </div>
+{{end}}
+
+</body>

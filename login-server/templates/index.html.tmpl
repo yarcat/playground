@@ -1,0 +1,7 @@
+{{with .auth}}
+  <p>Logged in as {{.Email}}</p>
+  <p>Navigate to <a href="/logout">logout</a></p>
+{{else}}
+  <p>Not logged in</p>
+  <p>Navigate to <a href="/login">login</a></p>
+{{end}}
