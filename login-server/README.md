@@ -6,5 +6,5 @@ My intention is to see whether a custom lightweight server will be enough for my
 
 ## Next
 
-1. Allows Google oauth2 signup.
+1. Allow Google oauth2 signup.
 
