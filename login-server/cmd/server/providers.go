@@ -8,6 +8,7 @@ import (
 	ajwt "login-server/pkg/jwt"
 	"login-server/pkg/service"
 	"login-server/pkg/user"
+	t "login-server/types"
 )
 
 func NewHTTPServerFromFlags(h ahttp.Router) *http.Server {
@@ -29,14 +30,14 @@ func NewSecretProviderFromFlags() (ajwt.SecretProvider, error) { return ajwt.New
 
 type (
 	// SaltHandler returns a new hasher given a salt.
-	SaltHasherFunc func(user.SecretSalt) user.Hasher
+	SaltHasherFunc func(t.SecretSalt) user.Hasher
 )
 
 // New implements the SaltHasher interface.
-func (f SaltHasherFunc) New(s user.SecretSalt) user.Hasher { return f(s) }
+func (f SaltHasherFunc) New(s t.SecretSalt) user.Hasher { return f(s) }
 
 func NewSaltHasher() user.SaltHasher {
-	return SaltHasherFunc(func(ss user.SecretSalt) user.Hasher {
+	return SaltHasherFunc(func(ss t.SecretSalt) user.Hasher {
 		return user.NewArgon2Hasher(argon2.WithSalt([]byte(ss)))
 	})
 }

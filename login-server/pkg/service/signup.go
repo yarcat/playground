@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"login-server/pkg/jwt"
-	"login-server/pkg/t"
 	"login-server/pkg/user"
+	t "login-server/types"
 	"time"
 )
 
@@ -29,7 +29,7 @@ func NewSignup(f user.Factory, h user.Hasher, iss string, exp time.Duration) *Si
 }
 
 // Signup creates a new user.
-func (s *Signup) Signup(ctx context.Context, n user.Name, e t.Email, p t.Password) (jwt.Token, error) {
+func (s *Signup) Signup(ctx context.Context, n t.Name, e t.Email, p t.Password) (jwt.Token, error) {
 	secret, salt, err := s.Hash(p)
 	if err != nil {
 		return jwt.Token{}, fmt.Errorf("signup: %w", err)

@@ -7,8 +7,7 @@ import (
 	"time"
 
 	ajwt "login-server/pkg/jwt"
-	"login-server/pkg/t"
-	"login-server/pkg/user"
+	t "login-server/types"
 )
 
 type (
@@ -80,7 +79,7 @@ func setAuthTokenCookie(w http.ResponseWriter, token ajwt.Token, secret []byte) 
 type (
 	// Signuper signs up a new user.
 	Signuper interface {
-		Signup(context.Context, user.Name, t.Email, t.Password) (ajwt.Token, error)
+		Signup(context.Context, t.Name, t.Email, t.Password) (ajwt.Token, error)
 	}
 	// SignupHandler handles the signup requests.
 	SignupHandler struct {

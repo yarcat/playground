@@ -2,7 +2,7 @@ package user
 
 import (
 	"login-server/pkg/crypto/argon2"
-	"login-server/pkg/t"
+	t "login-server/types"
 )
 
 type (
@@ -20,10 +20,10 @@ func NewArgon2Hasher(o ...argon2.OptionFunc) Argon2Hasher {
 }
 
 // Hash hashes the password using Argon2. Hash implements the Hasher interface.
-func (a Argon2Hasher) Hash(passwd t.Password) (SecretHash, SecretSalt, error) {
+func (a Argon2Hasher) Hash(passwd t.Password) (t.SecretHash, t.SecretSalt, error) {
 	opts := *a.Options
 	var salt []byte
 	argon2.WitchChainedOnSalt(func(s []byte) { salt = s })(&opts)
 	hash, err := argon2.NewArgon2WithOptions([]byte(passwd), &opts)
-	return SecretHash(string(hash)), SecretSalt(string(salt)), err
+	return t.SecretHash(string(hash)), t.SecretSalt(string(salt)), err
 }

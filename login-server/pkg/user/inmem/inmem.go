@@ -4,8 +4,8 @@ package inmem
 import (
 	"context"
 	"fmt"
-	"login-server/pkg/t"
 	u "login-server/pkg/user"
+	t "login-server/types"
 	"sync"
 	"time"
 
@@ -20,9 +20,9 @@ type Inmem struct {
 }
 
 // New implements the user.Factory interface.
-func (m *Inmem) New(ctx context.Context, n u.Name, e t.Email, h u.SecretHash, s u.SecretSalt, opts ...u.NewOptionFunc) (*u.User, error) {
+func (m *Inmem) New(ctx context.Context, n t.Name, e t.Email, h t.SecretHash, s t.SecretSalt, opts ...u.NewOptionFunc) (*u.User, error) {
 	if _, ok := m.Load(e); ok {
-		return nil, fmt.Errorf("inmem new: %w", fmt.Errorf("inmem new: email %q already exists", e))
+		return nil, fmt.Errorf("inmem new: %w", u.EmailExists(e))
 	}
 	id, err := nanoid.New()
 	if err != nil {
@@ -31,9 +31,8 @@ func (m *Inmem) New(ctx context.Context, n u.Name, e t.Email, h u.SecretHash, s 
 	var o u.NewOptions
 	u.FillOptions(&o, n, e, h, s, opts)
 	user := &u.User{
-		ID:      u.ID(id),
-		Created: time.Now(),
-
+		UserID:     t.UserID(id),
+		Created:    time.Now(),
 		Name:       o.Name,
 		Email:      o.Email,
 		Role:       o.Role,
@@ -42,16 +41,16 @@ func (m *Inmem) New(ctx context.Context, n u.Name, e t.Email, h u.SecretHash, s 
 	}
 	x, loaded := m.Map.LoadOrStore(user.Email, user)
 	if loaded { // Something else stored the same email.
-		return nil, fmt.Errorf("inmem new: %w", fmt.Errorf("inmem new: email %q already exists", user.Email))
+		return nil, fmt.Errorf("inmem new: %w", u.EmailExists(e))
 	}
 	return x.(*u.User), nil
 }
 
 // FromID implements the user.IDReader interface.
-func (m *Inmem) FromID(ctx context.Context, id u.ID) (*u.User, error) {
+func (m *Inmem) FromID(ctx context.Context, id t.UserID) (*u.User, error) {
 	var x *u.User
 	m.Range(func(_, v interface{}) bool {
-		if v.(*u.User).ID == id {
+		if v.(*u.User).UserID == id {
 			x = v.(*u.User)
 			return false
 		}

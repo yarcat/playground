@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"login-server/pkg/jwt"
-	"login-server/pkg/t"
 	"login-server/pkg/user"
+	t "login-server/types"
 	"time"
 )
 
