@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"simd/archsimd"
 	"slices"
 	"time"
+	"unsafe"
 )
 
 type TT interface {
@@ -83,6 +85,91 @@ func indepSums8[T TT](a []T) T {
 	return a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7
 }
 
+func indepSums8p[T TT](a []T) T {
+	n := uintptr(len(a))
+	end := n - n%8
+	
+	basePtr := unsafe.Pointer(&a[0])
+	size := unsafe.Sizeof(a[0])
+
+	var a0, a1, a2, a3, a4, a5, a6, a7 T
+	for i := uintptr(0); i < end; i += 8 {
+		block := (*[8]T)(unsafe.Add(basePtr, uintptr(i)*size))
+
+		a0 += block[0]
+		a1 += block[1]
+		a2 += block[2]
+		a3 += block[3]
+		a4 += block[4]
+		a5 += block[5]
+		a6 += block[6]
+		a7 += block[7]
+	}
+
+	for i := end; i < n; i++ {
+		val := (*T)(unsafe.Add(basePtr, uintptr(i)*size))
+		a0 += *val
+	}
+
+	return a0 + a1 + a2 + a3 + a4 + a5 + a6 + a7
+}
+
+func reduceAdd(acc archsimd.Int32x8) int32 {
+	s1 := acc.AddPairs(acc)
+	s2 := s1.AddPairs(s1)
+	var tmp [8]int32
+	s2.Store(&tmp)
+	return tmp[0] + tmp[4]
+}
+
+func indepSums8simdInt32(a []int32) int32 {
+	n := len(a)
+	const laneSize = 8
+	end := n - n%laneSize
+
+	var acc archsimd.Int32x8
+
+	for i := 0; i < end; i += laneSize {
+		ptr := (*[8]int32)(unsafe.Pointer(&a[i]))
+		v := archsimd.LoadInt32x8(ptr)
+		acc = acc.Add(v)
+	}
+
+	total := reduceAdd(acc)
+
+	for _, x := range a[end:] {
+		total += x
+	}
+
+	return total
+}
+
+func indepSums16simdInt32(a []int32) int32 {
+	n := len(a)
+	const laneSize = 16
+	end := n - n%laneSize
+
+	var acc0, acc1 archsimd.Int32x8
+
+	for i := 0; i < end; i += laneSize {
+		ptr0 := (*[8]int32)(unsafe.Pointer(&a[i]))
+		v0 := archsimd.LoadInt32x8(ptr0)
+		acc0 = acc0.Add(v0)
+
+		ptr1 := (*[8]int32)(unsafe.Pointer(&a[i+8]))
+		v1 := archsimd.LoadInt32x8(ptr1)
+		acc1 = acc1.Add(v1)
+	}
+
+	total := reduceAdd(acc0.Add(acc1))
+
+	for _, x := range a[end:] {
+		total += x
+	}
+
+	return total
+}
+
 func paral[T TT](a []T) (sum T) {
 	n := runtime.NumCPU() * 2
 	seg := (len(a) + n - 1) / n
@@ -93,7 +180,8 @@ func paral[T TT](a []T) (sum T) {
 			// out <- simpleLoop(a[i*seg : min(i*seg+seg, len(a))])
 			// out <- indepSums2(a[i*seg : min(i*seg+seg, len(a))])
 			// out <- indepSums4(a[i*seg : min(i*seg+seg, len(a))])
-			out <- indepSums8(a[i*seg : min(i*seg+seg, len(a))])
+			// out <- indepSums8(a[i*seg : min(i*seg+seg, len(a))])
+			out <- indepSums8p(a[i*seg : min(i*seg+seg, len(a))])
 		}()
 	}
 
@@ -105,7 +193,7 @@ func paral[T TT](a []T) (sum T) {
 }
 
 func report[T TT](name string, f func([]T) T, a []T) {
-	const iters = 501
+	const iters = 101
 
 	d := make([]time.Duration, iters)
 
@@ -137,5 +225,8 @@ func main() {
 	report("indepSums2", indepSums2, a)
 	report("indepSums4", indepSums4, a)
 	report("indepSums8", indepSums8, a)
+	report("indepSums8p", indepSums8p, a)
+	report("8simdInt32", indepSums8simdInt32, a)
+	report("16simdInt32", indepSums16simdInt32, a)
 	report("paral", paral, a)
 }
